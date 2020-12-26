@@ -8,6 +8,7 @@ from odoo.addons.component.core import Component
 class PartnerCategoryBatchImporter(Component):
     _name = 'prestashop.res.partner.category.batch.importer'
     _inherit = 'prestashop.delayed.batch.importer'
+    # _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.res.partner.category'
 
 
@@ -43,6 +44,8 @@ class PartnerCategoryImporter(Component):
     def _after_import(self, binding):
         super(PartnerCategoryImporter, self)._after_import(binding)
         record = self.prestashop_record
+        if 'group' in record:
+            record = record['group']
         if float(record['reduction']):
             self.env['prestashop.groups.pricelist'].import_record(
                 self.backend_record,

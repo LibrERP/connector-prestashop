@@ -12,7 +12,7 @@ class PaymentModeBatchImporter(Component):
     def run(self, filters=None, **kwargs):
         if filters is None:
             filters = {}
-        filters['display'] = '[id,payment]'
+        filters['display'] = '[id,payment,reference]'
         return super(PaymentModeBatchImporter, self).run(
             filters, **kwargs
         )
@@ -35,7 +35,19 @@ class PaymentModeBatchImporter(Component):
              ],
         )
         if len(journals) != 1:
-            return
+            sequence_record = self.env['ir.sequence'].create({
+                'name': 'bnk Sequence',
+                'implementation': 'no_gap',
+                'number_next': 1,
+                'number_increment': 1,
+                'padding': 4
+            })
+            journals = self.env['account.journal'].create({
+                'name': 'Kalamitica Bank',
+                'code': 'bnk',
+                'type': 'bank',
+                'sequence_id': sequence_record.id
+            })
         mode = self.model.create({
             'name': record['payment'],
             'company_id': self.backend_record.company_id.id,
@@ -43,4 +55,5 @@ class PaymentModeBatchImporter(Component):
             'fixed_journal_id': journals.id,
             'payment_method_id': payment_method.id
         })
+
         self.backend_record.add_checkpoint(mode, message=None)

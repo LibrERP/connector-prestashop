@@ -403,7 +403,7 @@ class ProductInventoryBatchImporter(Component):
     def _import_record(self, record_id, record=None, **kwargs):
         """ Delay the import of the records"""
         assert record
-        self.env['_import_stock_available'].with_delay().import_record(
+        self.env['_import_stock_available'].import_record(
             self.backend_record,
             record_id,
             record=record,
@@ -558,7 +558,7 @@ class ProductTemplateImporter(Component):
                     lambda x: (x.attribute_id.id == attribute_id and
                                x.id not in attr_line_value_ids))
                 if values:
-                    self.env['product.attribute.line'].create({
+                    self.env['product.template.attribute.line'].create({
                         'attribute_id': attribute_id,
                         'product_tmpl_id': template_id,
                         'value_ids': [(6, 0, values.ids)],
@@ -575,8 +575,7 @@ class ProductTemplateImporter(Component):
                                 **kwargs)
 
     def _delay_product_image_variant(self, combinations, **kwargs):
-        delayable = self.env['prestashop.product.combination'].with_delay(
-            priority=15)
+        delayable = self.env['prestashop.product.combination']
         delayable.set_product_image_variant(
             self.backend_record,
             combinations,
@@ -614,8 +613,7 @@ class ProductTemplateImporter(Component):
             images = [images]
         for image in images:
             if image.get('id'):
-                delayable = self.env['prestashop.product.image'].with_delay(
-                    priority=10)
+                delayable = self.env['prestashop.product.image']
                 delayable.import_product_image(
                     self.backend_record,
                     prestashop_record['id'],
@@ -627,7 +625,7 @@ class ProductTemplateImporter(Component):
             'filter[id_product]': ps_id,
             'filter[id_product_attribute]': 0
         }
-        self.env['prestashop.product.supplierinfo'].with_delay().import_batch(
+        self.env['prestashop.product.supplierinfo'].import_batch(
             self.backend_record,
             filters=filters
         )
@@ -658,9 +656,9 @@ class ProductTemplateImporter(Component):
 
     def _import_default_category(self):
         record = self.prestashop_record
-        if int(record['id_category_default']):
+        if int(record['product']['id_category_default']):
             try:
-                self._import_dependency(record['id_category_default'],
+                self._import_dependency(record['product']['id_category_default'],
                                         'prestashop.product.category')
             except PrestaShopWebServiceError:
                 # a checkpoint will be added in _after_import (because
@@ -693,5 +691,5 @@ class ManufacturerProductDependency(Component):
 
 class ProductTemplateBatchImporter(Component):
     _name = 'prestashop.product.template.batch.importer'
-    _inherit = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.product.template'

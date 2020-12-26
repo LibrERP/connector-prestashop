@@ -68,8 +68,10 @@ class MailMessageImporter(Component):
 
 
 class MailMessageBatchImporter(Component):
-    _name = 'prestashop.mail.message.delayed.importer'
-    _inherit = 'prestashop.delayed.batch.importer'
+    # _name = 'prestashop.mail.message.delayed.importer'
+    _name = 'prestashop.mail.message.direct.importer'
+    # _inherit = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.mail.message'
 
     _model_name = 'prestashop.mail.message'

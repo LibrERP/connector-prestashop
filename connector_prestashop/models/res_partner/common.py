@@ -96,9 +96,13 @@ class PrestashopResPartner(models.Model):
                 'filter[date_upd]': '>[%s]' % since_date}
         now_fmt = fields.Datetime.now()
         self.env['prestashop.res.partner.category'].import_batch(
-            backend=backend_record, filters=filters, priority=10, **kwargs)
+            backend=backend_record, filters=filters, **kwargs)
         self.env['prestashop.res.partner'].import_batch(
-            backend=backend_record, filters=filters, priority=15, **kwargs)
+            backend=backend_record, filters=filters, **kwargs)
+        # self.env['prestashop.res.partner.category'].import_batch(
+        #     backend=backend_record, priority=10, filters=filters, **kwargs)
+        # self.env['prestashop.res.partner'].import_batch(
+        #     backend=backend_record, priority=15, filters=filters, **kwargs)
         backend_record.import_partners_since = now_fmt
         return True
 

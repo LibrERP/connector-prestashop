@@ -72,8 +72,10 @@ class PrestashopSaleOrder(models.Model):
         if since_date:
             filters = {'date': '1', 'filter[date_upd]': '>[%s]' % (since_date)}
         now_fmt = fields.Datetime.now()
+        # self.env['prestashop.sale.order'].import_batch(
+        #     backend, filters=filters, priority=5, max_retries=0)
         self.env['prestashop.sale.order'].import_batch(
-            backend, filters=filters, priority=5, max_retries=0)
+            backend, filters=filters)
         if since_date:
             filters = {'date': '1', 'filter[date_add]': '>[%s]' % since_date}
         self.env['prestashop.mail.message'].import_batch(backend, filters)
@@ -157,6 +159,8 @@ class PrestashopSaleOrderLine(models.Model):
             ('id', '=', vals['prestashop_order_id'])
         ], limit=1)
         vals['order_id'] = ps_sale_order.odoo_id.id
+        vals['name'] = ps_sale_order.name or ''
+        vals['display_name'] = ps_sale_order.display_name
         return super(PrestashopSaleOrderLine, self).create(vals)
 
 
@@ -228,7 +232,7 @@ class OrderDiscountAdapter(Component):
     _name = 'prestashop.sale.order.line.discount.adapter'
     _inherit = 'prestashop.adapter'
     _apply_on = 'prestashop.sale.order.line.discount'
-    _prestashop_model = 'order_discounts'
+    _prestashop_model = 'order_cart_rule'
 
 
 class PrestashopSaleOrderListener(Component):
@@ -246,4 +250,4 @@ class PrestashopSaleOrderListener(Component):
             )
             if states:
                 for binding in record.prestashop_bind_ids:
-                    binding.with_delay(priority=20).export_sale_state()
+                    binding.export_sale_state()

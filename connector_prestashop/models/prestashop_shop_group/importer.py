@@ -22,7 +22,7 @@ class ShopGroupMapper(Component):
 
     @mapping
     def name(self, record):
-        name = record['name']
+        name = record['shop_group']['name']
         if name is None:
             name = _('Undefined')
         return {'name': name}

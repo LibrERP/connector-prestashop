@@ -47,7 +47,7 @@ def api_handle_errors(message=''):
     except PrestaShopWebServiceError as err:
         raise exceptions.UserError(
             _(u'{}Error during synchronization with '
-                'PrestaShop:\n\n{}').format(message, unicode(err))
+                'PrestaShop:\n\n{}').format(message, str(err))
         )
 
 
@@ -91,12 +91,13 @@ class PrestaShopWebServiceImage(PrestaShopWebServiceDict):
 class PrestaShopLocation(object):
 
     def __init__(self, location, webservice_key):
+        location = location.decode('utf-8')
         self.location = location
         self.webservice_key = webservice_key
         if not location.endswith('/api'):
             location = location + '/api'
         if not location.startswith('http'):
-            location = 'http://' + location
+            location = 'https://' + location
         self.api_url = location
 
 
@@ -183,7 +184,7 @@ class GenericAdapter(AbstractComponent):
         """
         _logger.debug(
             'method search, model %s, filters %s',
-            self._prestashop_model, unicode(filters))
+            self._prestashop_model, str(filters))
         return self.client.search(self._prestashop_model, filters)
 
     def read(self, id, attributes=None):
@@ -193,16 +194,25 @@ class GenericAdapter(AbstractComponent):
         """
         _logger.debug(
             'method read, model %s id %s, attributes %s',
-            self._prestashop_model, str(id), unicode(attributes))
+            self._prestashop_model, str(id), str(attributes))
         res = self.client.get(self._prestashop_model, id, options=attributes)
-        first_key = res.keys()[0]
-        return res[first_key]
+        if self._prestashop_model == 'carriers':
+            deliveries_id = self.client.search('deliveries', {'filter[id_carrier]': res['carrier']['id']})
+            if deliveries_id:
+                range_price_id = self.client.get('deliveries', deliveries_id[0], options=None)['delivery'][
+                    'id_range_price']
+                price_range = format(float(
+                    self.client.get("price_ranges", range_price_id, options=None)['price_range']['delimiter1']))
+                res.update({
+                    'price_range': price_range
+                })
+        return res
 
     def create(self, attributes=None):
         """ Create a record on the external system """
         _logger.debug(
             'method create, model %s, attributes %s',
-            self._prestashop_model, unicode(attributes))
+            self._prestashop_model, str(attributes))
         res = self.client.add(self._prestashop_model, {
             self._export_node_name: attributes
         })
@@ -216,7 +226,7 @@ class GenericAdapter(AbstractComponent):
         _logger.debug(
             'method write, model %s, attributes %s',
             self._prestashop_model,
-            unicode(attributes)
+            str(attributes)
         )
         res = self.client.edit(
             self._prestashop_model, {self._export_node_name: attributes})
@@ -226,7 +236,7 @@ class GenericAdapter(AbstractComponent):
 
     def delete(self, resource, ids):
         _logger.debug('method delete, model %s, ids %s',
-                      resource, unicode(ids))
+                      resource, str(ids))
         # Delete a record(s) on the external system
         return self.client.delete(resource, ids)
 

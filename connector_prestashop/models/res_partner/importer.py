@@ -109,22 +109,24 @@ class ResPartnerImporter(Component):
                                     'prestashop.res.partner.category')
 
     def _after_import(self, binding):
+        # self.prestashop_record = self.prestashop_record['customer']
         super(ResPartnerImporter, self)._after_import(binding)
         binder = self.binder_for()
         ps_id = binder.to_external(binding)
-        self.env['prestashop.address'].with_delay(priority=10).import_batch(
+        self.env['prestashop.address'].import_batch(
             backend=self.backend_record,
             filters={'filter[id_customer]': '%d' % (ps_id,)})
 
 
 class PartnerBatchImporter(Component):
     _name = 'prestashop.res.partner.batch.importer'
-    _inherit = 'prestashop.delayed.batch.importer'
+    # _inherit = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.res.partner'
 
 
 class AddressImportMapper(Component):
-    _name = 'prestashop.address.mappper'
+    _name = 'prestashop.address.mapper'
     _inherit = 'prestashop.import.mapper'
     _apply_on = 'prestashop.address'
 
@@ -196,6 +198,8 @@ class AddressImporter(Component):
     def _after_import(self, binding):
         record = self.prestashop_record
         vat_number = None
+        if 'address' in record:
+            record = record['address']
         if record['vat_number']:
             vat_number = record['vat_number'].replace('.', '').replace(' ', '')
         # TODO move to custom localization module
@@ -219,5 +223,5 @@ class AddressImporter(Component):
 
 class AddressBatchImporter(Component):
     _name = 'prestashop.address.batch.importer'
-    _inherit = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.address'

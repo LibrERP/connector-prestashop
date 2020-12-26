@@ -6,6 +6,7 @@ from contextlib import closing, contextmanager
 
 import odoo
 from odoo import _
+from odoo import registry
 
 from odoo.addons.queue_job.exception import (
     RetryableJobError,
@@ -16,7 +17,7 @@ from odoo.addons.component.core import AbstractComponent
 
 _logger = logging.getLogger(__name__)
 
-RETRY_ON_ADVISORY_LOCK = 1  # seconds
+RETRY_ON_ADVISORY_LOCK = 5  # seconds
 RETRY_WHEN_CONCURRENT_DETECTED = 1  # seconds
 
 
@@ -99,6 +100,12 @@ class PrestashopImporter(AbstractComponent):
         :py:class:`~openerp.addons.connector.unit.mapper.MapRecord`
 
         """
+        if 'customer' in self.prestashop_record:
+            self.prestashop_record = self.prestashop_record['customer']
+        if 'shop' in self.prestashop_record:
+            self.prestashop_record = self.prestashop_record['shop']
+        if 'address' in self.prestashop_record:
+            self.prestashop_record = self.prestashop_record['address']
         return self.mapper.map_record(self.prestashop_record)
 
     def _validate_data(self, data):
@@ -125,12 +132,26 @@ class PrestashopImporter(AbstractComponent):
         return map_record.values(for_create=True)
 
     def _update_data(self, map_record):
-        return map_record.values()
+        test = map_record.values()
+        return test
 
     def _create(self, data):
         """ Create the OpenERP record """
         # special check on data before import
         self._validate_data(data)
+        if 'shop' in self.prestashop_record:
+            self.prestashop_record = self.prestashop_record['shop']
+        elif 'tax_rule_group' in self.prestashop_record:
+            self.prestashop_record = self.prestashop_record['tax_rule_group']
+        if 'name' in data and 'name_ext' not in data:
+            if 'shop_group' in self.prestashop_record:
+                data['name'] = self.prestashop_record['shop_group']['name']
+            if 'order_state' in self.prestashop_record:
+                data['name'] = self.prestashop_record['order_state']['name']
+            if 'group' in self.prestashop_record:
+                data['name'] = self.prestashop_record['group']['name']
+            if 'name' in self.prestashop_record:
+                data['name'] = self.prestashop_record['name']
         binding = self.model.with_context(
             **self._create_context()
         ).create(data)
@@ -166,10 +187,10 @@ class PrestashopImporter(AbstractComponent):
         for instance to see if another transaction already made the work.
         """
         with odoo.api.Environment.manage():
-            registry = odoo.modules.registry.RegistryManager.get(
-                self.env.cr.dbname
-            )
-            with closing(registry.cursor()) as cr:
+            # registry = odoo.modules.registry.RegistryManager.get(
+            #     self.env.cr.dbname
+            # )
+            with closing(registry(self.env.cr.dbname).cursor()) as cr:
                 try:
                     new_env = odoo.api.Environment(cr, self.env.uid,
                                                    self.env.context)
@@ -280,23 +301,41 @@ class PrestashopImporter(AbstractComponent):
         """
 
         map_record = self._map_data()
+        if self.work.model_name == 'prestashop.account.tax.group':
+            if map_record.source['tax_rule_group']['active'] == '1' and map_record.source['tax_rule_group']['deleted'] == '0':
+                if binding:
+                    record = self._update_data(map_record)
+                else:
+                    record = self._create_data(map_record)
 
-        if binding:
-            record = self._update_data(map_record)
+                # special check on data before import
+                self._validate_data(record)
+
+                if binding:
+                    self._update(binding, record)
+                else:
+                    binding = self._create(record)
+
+                self.binder.bind(self.prestashop_id, binding)
+
+                self._after_import(binding)
         else:
-            record = self._create_data(map_record)
+            if binding:
+                record = self._update_data(map_record)
+            else:
+                record = self._create_data(map_record)
 
-        # special check on data before import
-        self._validate_data(record)
+            # special check on data before import
+            self._validate_data(record)
 
-        if binding:
-            self._update(binding, record)
-        else:
-            binding = self._create(record)
+            if binding:
+                self._update(binding, record)
+            else:
+                binding = self._create(record)
 
-        self.binder.bind(self.prestashop_id, binding)
+            self.binder.bind(self.prestashop_id, binding)
 
-        self._after_import(binding)
+            self._after_import(binding)
 
 
 class BatchImporter(AbstractComponent):
@@ -336,7 +375,7 @@ class BatchImporter(AbstractComponent):
 
     def _import_record(self, record):
         """ Import a record directly or delay the import of the record """
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class DirectBatchImporter(AbstractComponent):
@@ -357,6 +396,23 @@ class DirectBatchImporter(AbstractComponent):
 
 
 class DelayedBatchImporter(AbstractComponent):
+    """ Import the PrestaShop Shop Groups + Shops
+
+    They are imported directly because this is a rare and fast operation,
+    performed from the UI.
+    """
+    _name = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.batch.importer'
+    _model_name = None
+
+    def _import_record(self, external_id):
+        """ Import the record directly """
+        self.env[self.model._name].import_record(
+            backend=self.backend_record,
+            prestashop_id=external_id)
+
+
+class DelayedBatchImporter00(AbstractComponent):
     """ Delay import of the records """
 
     _name = 'prestashop.delayed.batch.importer'
@@ -415,6 +471,10 @@ class TranslatableRecordImporter(AbstractComponent):
         languages = {}
         for field in self._translatable_fields[self.model._name]:
             # TODO FIXME in prestapyt
+            if 'order_state' in record:
+                record = record['order_state']
+            elif 'group' in record:
+                record = record['group']
             if not isinstance(record[field]['language'], list):
                 record[field]['language'] = [record[field]['language']]
             for language in record[field]['language']:
@@ -442,6 +502,14 @@ class TranslatableRecordImporter(AbstractComponent):
             }
         """
         split_record = {}
+        if 'category' in record:
+            record = record['category']
+        elif 'product' in record:
+            record = record['product']
+        elif 'order_state' in record:
+            record = record['order_state']
+        elif 'group' in record:
+            record = record['group']
         languages = self.find_each_language(record)
         if not languages:
             raise FailedJobError(
@@ -449,7 +517,7 @@ class TranslatableRecordImporter(AbstractComponent):
                   'Run "Synchronize base data".')
             )
         model_name = self.model._name
-        for language_id, language_code in languages.iteritems():
+        for language_id, language_code in languages.items():
             split_record[language_code] = record.copy()
         _fields = self._translatable_fields[model_name]
         if fields:
@@ -508,7 +576,7 @@ class TranslatableRecordImporter(AbstractComponent):
 
     def _after_import(self, binding):
         """ Hook called at the end of the import """
-        for lang_code, lang_record in self.other_langs_data.iteritems():
+        for lang_code, lang_record in self.other_langs_data.items():
             map_record = self.mapper.map_record(lang_record)
             binding.with_context(
                 lang=lang_code,

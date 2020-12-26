@@ -133,7 +133,7 @@ class PrestashopProductTemplate(models.Model):
         for product in self:
             backends[product.backend_id].add(product.id)
 
-        for backend, product_ids in backends.iteritems():
+        for backend, product_ids in backends['prestashop.backend']:
             products = self.browse(product_ids)
             products._recompute_prestashop_qty_backend(backend)
         return True
@@ -161,11 +161,17 @@ class PrestashopProductTemplate(models.Model):
             filters = {'date': '1', 'filter[date_upd]': '>[%s]' % (since_date)}
         now_fmt = fields.Datetime.now()
 
+        # self.env['prestashop.product.category'].import_batch(
+        #     backend, filters=filters, priority=10)
+
         self.env['prestashop.product.category'].import_batch(
-            backend, filters=filters, priority=10)
+            backend, filters=filters)
+
+        # self.env['prestashop.product.template'].import_batch(
+        #     backend, filters=filters, priority=15)
 
         self.env['prestashop.product.template'].import_batch(
-            backend, filters=filters, priority=15)
+            backend, filters=filters)
 
         backend.import_products_since = now_fmt
         return True
@@ -279,6 +285,6 @@ class PrestashopProductQuantityListener(Component):
             set(fields).intersection(self._get_inventory_fields())
         )
         if inventory_fields:
-            record.with_delay(priority=20).export_inventory(
+            record.export_inventory(
                 fields=inventory_fields
             )

@@ -24,7 +24,7 @@ class PrestashopExportMapper(AbstractComponent):
         res = super(PrestashopExportMapper, self)._map_direct(record,
                                                               from_attr,
                                                               to_attr) or ''
-        if isinstance(from_attr, basestring):
+        if isinstance(from_attr, (str,bytes)):
             column = self.model.fields_get()[from_attr]
             if column['type'] == 'boolean':
                 return res and 1 or 0

@@ -30,7 +30,7 @@ class AutoMatchingImporter(Component):
         nr_ps_already_mapped = 0
         nr_ps_mapped = 0
         nr_ps_not_mapped = 0
-        erp_model_name = self.model._inherits.iterkeys().next()
+        erp_model_name = iter(self.model._inherits.keys()).__next__()
         erp_rec_name = self.env[erp_model_name]._rec_name
         model = self.env[erp_model_name].with_context(active_test=False)
         erp_ids = model.search([])
@@ -41,7 +41,7 @@ class AutoMatchingImporter(Component):
         if not ps_ids:
             raise exceptions.Warning(
                 _('Failed to query %s via PS webservice')
-                % adapter.prestashop_model
+                % adapter._prestashop_model
             )
 
         binder = self.binder_for()
@@ -49,6 +49,12 @@ class AutoMatchingImporter(Component):
         for ps_id in ps_ids:
             # Check if the PS ID is already mapped to an OE ID
             record = binder.to_internal(ps_id)
+            # if record._name == 'prestashop.res.lang':
+            #     ps_dict = ps_dict['language']
+            # elif record._name == 'prestashop.res.country':
+            #     field = 'country'
+            # elif record._name == 'prestashop.res.lang':
+            #     ps_dict =
             if record:
                 # Do nothing for the PS IDs that are already mapped
                 _logger.debug(
@@ -60,6 +66,15 @@ class AutoMatchingImporter(Component):
                 # PS IDs not mapped => I try to match between the PS ID and
                 # the OE ID. First, I read field in PS
                 ps_dict = adapter.read(ps_id)
+                if record._name == 'prestashop.res.lang':
+                    ps_dict = ps_dict['language']
+                elif record._name == 'prestashop.res.country':
+                    ps_dict = ps_dict['country']
+                elif record._name == 'prestashop.res.currency':
+                    ps_dict = ps_dict['currency']
+                elif record._name == 'prestashop.account.tax':
+                    ps_dict = ps_dict['tax']
+                    # ps_dict['name'] = ps_dict['name']['language']
                 mapping_found = False
                 # Loop on OE IDs
                 for erp_dict in erp_list_dict:
@@ -69,25 +84,26 @@ class AutoMatchingImporter(Component):
                     if self._compare_function(
                             ps_val, erp_val, ps_dict, erp_dict):
                         # it matches, so I write the external ID
-                        data = {
-                            'odoo_id': erp_dict['id'],
-                            'backend_id': self.backend_record.id,
-                        }
-                        for oe_field, ps_field in self._copy_fields:
-                            data[oe_field] = ps_dict[ps_field]
-                        record = self.model.create(data)
-                        binder.bind(ps_id, record)
-                        _logger.debug(
-                            "[%s] Mapping PrestaShop '%s' (%s) "
-                            "to Odoo '%s' (%s) " %
-                            (self.model._name,
-                             ps_dict['name'],  # not hardcode if needed
-                             ps_dict[self._ps_field],
-                             erp_dict[erp_rec_name],
-                             erp_dict[self._erp_field]))
-                        nr_ps_mapped += 1
-                        mapping_found = True
-                        break
+                        if ps_dict['active'] == '1':
+                            data = {
+                                'odoo_id': erp_dict['id'],
+                                'backend_id': self.backend_record.id,
+                            }
+                            for oe_field, ps_field in self._copy_fields:
+                                data[oe_field] = ps_dict[ps_field]
+                            record = self.model.create(data)
+                            binder.bind(ps_id, record)
+                            _logger.debug(
+                                "[%s] Mapping PrestaShop '%s' (%s) "
+                                "to Odoo '%s' (%s) " %
+                                (self.model._name,
+                                 ps_dict['name'],  # not hardcode if needed
+                                 ps_dict[self._ps_field],
+                                 erp_dict[erp_rec_name],
+                                 erp_dict[self._erp_field]))
+                            nr_ps_mapped += 1
+                            mapping_found = True
+                            break
                 if not mapping_found:
                     # if it doesn't match, I just print a warning
                     _logger.warning(

@@ -7,8 +7,9 @@ from odoo.addons.component.core import Component
 from odoo import models, fields, api, exceptions, _
 
 from ...components.backend_adapter import api_handle_errors
-from odoo.addons.connector.checkpoint import checkpoint
-from odoo.addons.base.res.res_partner import _tz_get
+from odoo.addons.connector.models.checkpoint import add_checkpoint
+from odoo.addons.base.models.res_partner import _tz_get
+import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ class PrestashopBackend(models.Model):
         '1.5': 'prestashop.version.key',
         '1.6.0.9': 'prestashop.version.key.1.6.0.9',
         '1.6.0.11': 'prestashop.version.key.1.6.0.9',
-        '1.6.1.2': 'prestashop.version.key.1.6.1.2'
+        '1.6.1.2': 'prestashop.version.key.1.6.1.2',
+        '1.7.6.5': 'prestashop.version.key.1.7.6.5'
     }
 
     @api.model
@@ -35,7 +37,8 @@ class PrestashopBackend(models.Model):
             ('1.5', '< 1.6.0.9'),
             ('1.6.0.9', '1.6.0.9 - 1.6.0.10'),
             ('1.6.0.11', '>= 1.6.0.11 - <1.6.1.2'),
-            ('1.6.1.2', '=1.6.1.2')
+            ('1.6.1.2', '=1.6.1.2'),
+            ('1.7.6.5', '=1.7.6.5')
         ]
 
     @api.model
@@ -45,6 +48,7 @@ class PrestashopBackend(models.Model):
                 ('checked', 'Checked'),
                 ('production', 'In Production')]
 
+    name = fields.Char()
     version = fields.Selection(
         selection='select_versions',
         string='Version',
@@ -91,6 +95,7 @@ class PrestashopBackend(models.Model):
     import_products_since = fields.Datetime('Import Products since')
     import_refunds_since = fields.Datetime('Import Refunds since')
     import_suppliers_since = fields.Datetime('Import Suppliers since')
+    import_payment_modes_since = fields.Datetime('Import Payment methods since')
     language_ids = fields.One2many(
         comodel_name='prestashop.res.lang',
         inverse_name='backend_id',
@@ -143,7 +148,7 @@ class PrestashopBackend(models.Model):
     matching_customer = fields.Boolean(
         string="Matching Customer",
         help="The selected fields will be matched to the ref field of the "
-        "partner. Please adapt your datas consequently.")
+             "partner. Please adapt your datas consequently.")
     # matching_customer_ch = fields.Many2one(
     #     comodel_name='prestashop.partner.field', string="Matched field",
     #     help="Field that will be matched.")
@@ -154,14 +159,14 @@ class PrestashopBackend(models.Model):
          ('immediately_usable_qty', 'Available to promise'),
          ('potential_qty', 'Potential')],
         help="Some of this options may need some additionnal modules you'll "
-        "have to install by yourself from "
-        "https://github.com/OCA/stock-logistics-warehouse",
+             "have to install by yourself from "
+             "https://github.com/OCA/stock-logistics-warehouse",
         required=True,
         default='virtual_available')
     tz = fields.Selection(
         _tz_get, 'Timezone', size=64,
         help="The timezone of the backend. Used to synchronize the sale order "
-        "date.")
+             "date.")
 
     @api.onchange("matching_customer")
     def change_matching_customer(self):
@@ -176,27 +181,28 @@ class PrestashopBackend(models.Model):
 
         # options = {'limit': 1, 'display': 'full'}
         # TODO : Unse new adapter pattern to get a simple partner json
-#         prestashop = PrestaShopLocation(
-#                         self.location.encode(),
-#                         self.webservice_key,
-#                     )
-#
-#         client = PrestaShopWebServiceDict(
-#                     prestashop.api_url,
-#                     prestashop.webservice_key)
-#
-#         customer = client.get('customers', options=options)
-#         tab=customer['customers']['customer'].keys()
-#         for key in tab:
-#             key_present = self.env['prestashop.partner.field'].search(
-#                     [('value', '=', key), ('backend_id', '=', backend_id)])
-#
-#             if len(key_present) == 0 :
-#                 self.env['prestashop.partner.field'].create({
-#                     'name' : key,
-#                     'value' : key,
-#                     'backend_id': backend_id
-#                 })
+
+    #         prestashop = PrestaShopLocation(
+    #                         self.location.encode(),
+    #                         self.webservice_key,
+    #                     )
+    #
+    #         client = PrestaShopWebServiceDict(
+    #                     prestashop.api_url,
+    #                     prestashop.webservice_key)
+    #
+    #         customer = client.get('customers', options=options)
+    #         tab=customer['customers']['customer'].keys()
+    #         for key in tab:
+    #             key_present = self.env['prestashop.partner.field'].search(
+    #                     [('value', '=', key), ('backend_id', '=', backend_id)])
+    #
+    #             if len(key_present) == 0 :
+    #                 self.env['prestashop.partner.field'].create({
+    #                     'name' : key,
+    #                     'value' : key,
+    #                     'backend_id': backend_id
+    #                 })
 
     @api.model
     def _default_pricelist_id(self):
@@ -210,11 +216,8 @@ class PrestashopBackend(models.Model):
         """
         self.ensure_one()
         record.ensure_one()
-        chk_point = checkpoint.add_checkpoint(self.env, record._name,
-                                              record.id, self._name, self.id)
-        if message:
-            chk_point.message_post(body=message)
-        return chk_point
+        return add_checkpoint(self.env, record._name, record.id,
+                              self._name, self.id)
 
     @api.multi
     def button_reset_to_draft(self):
@@ -268,23 +271,21 @@ class PrestashopBackend(models.Model):
     def import_customers_since(self):
         for backend_record in self:
             since_date = backend_record.import_partners_since
-            self.env['prestashop.res.partner'].with_delay(
-                ).import_customers_since(
-                    backend_record=backend_record, since_date=since_date)
+            self.env['prestashop.res.partner'].import_customers_since(
+                backend_record=backend_record, since_date=since_date)
         return True
 
     @api.multi
     def import_products(self):
         for backend_record in self:
             since_date = backend_record.import_products_since
-            self.env['prestashop.product.template'].with_delay(
-                ).import_products(backend_record, since_date)
+            self.env['prestashop.product.template'].import_products(backend_record, since_date)
         return True
 
     @api.multi
     def import_carriers(self):
         for backend_record in self:
-            self.env['prestashop.delivery.carrier'].with_delay().import_batch(
+            self.env['prestashop.delivery.carrier'].import_batch(
                 backend_record,
             )
         return True
@@ -292,24 +293,23 @@ class PrestashopBackend(models.Model):
     @api.multi
     def update_product_stock_qty(self):
         for backend_record in self:
-            backend_record.env['prestashop.product.template']\
-                .with_delay().export_product_quantities(backend=backend_record)
-            backend_record.env['prestashop.product.combination']\
-                .with_delay().export_product_quantities(backend=backend_record)
+            backend_record.env['prestashop.product.template'] \
+                .export_product_quantities(backend=backend_record)
+            backend_record.env['prestashop.product.combination'] \
+                .export_product_quantities(backend=backend_record)
         return True
 
     @api.multi
     def import_stock_qty(self):
         for backend_record in self:
-            backend_record.env['prestashop.product.template']\
-                .with_delay().import_inventory(backend_record)
+            backend_record.env['prestashop.product.template'] \
+                .import_inventory(backend_record)
 
     @api.multi
     def import_sale_orders(self):
         for backend_record in self:
             since_date = backend_record.import_orders_since
-            backend_record.env['prestashop.sale.order'].with_delay(
-                ).import_orders_since(backend_record, since_date)
+            backend_record.env['prestashop.sale.order'].import_orders_since(backend_record, since_date)
         return True
 
     @api.multi
@@ -318,6 +318,7 @@ class PrestashopBackend(models.Model):
             with backend_record.work_on('account.payment.mode') as work:
                 importer = work.component(usage='batch.importer')
                 importer.run(filters={})
+                backend_record.import_payment_modes_since = fields.Datetime.now()
         return True
 
     @api.multi
@@ -335,6 +336,12 @@ class PrestashopBackend(models.Model):
             backend_record.env['prestashop.supplier'].import_suppliers(
                 backend_record, since_date)
         return True
+
+    # @api.multi
+    # def import_res_partner(self):
+    #     for backend_record in self:
+    #         self.env['prestashop.res.partner'].with_delay().import_customer(backend_record)
+    #     return True
 
     def get_version_ps_key(self, key):
         self.ensure_one()
@@ -371,6 +378,10 @@ class PrestashopBackend(models.Model):
     @api.model
     def _scheduler_import_suppliers(self, domain=None):
         self.search(domain or []).import_suppliers()
+
+    # @api.model
+    # def _scheduler_import_res_partner(self, domain=None):
+    #     self.search(domain or []).import_res_partner()
 
     @api.multi
     def _get_locations_for_stock_quantities(self):

@@ -40,14 +40,24 @@ PrestaShop.
 Installation
 ============
 
+Installation requirements based on Odoo version 12.0.
 It doesn't require any plug-in in PrestaShop, but requires an extra Python
-library in Odoo server side, called prestapyt:
+library in Odoo server side, called prestapyt, download it from:
 
-https://github.com/prestapyt/prestapyt/
+https://github.com/prestapyt/prestapyt.git
 
-You can use pip install system to install it
+Or you can use pip install system to install it
 
-`sudo pip install prestapyt`
+sudo pip3 install prestapyt
+
+Requires "base_multi_image module", on version 12 it's available from:
+
+https://github.com/PESOL/server-tools/tree/12.0-mig-base_multi_image
+
+Finally install "vcr" python library :
+
+apt-get install python3-vcr
+
 
 Configuration
 =============
@@ -156,6 +166,7 @@ Contributors
 * Simone Orsi <simone.orsi@camptocamp.com>
 * Florent THOMAS <florent.thomas@mind-and-go.com>
 * Francisco Fernández <ffernandez@planetatic.com>
+* Michele Trevisan <michele.trevisan@didotech.com>
 
 Maintainer
 ----------

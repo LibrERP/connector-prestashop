@@ -81,7 +81,7 @@ class PrestashopRefund(models.Model):
         if since_date:
             filters = {'date': '1', 'filter[date_upd]': '>[%s]' % (since_date)}
         now_fmt = fields.Datetime.now()
-        self.env['prestashop.refund'].with_delay().import_batch(
+        self.env['prestashop.refund'].import_batch(
             backend,
             filters,
             **kwargs
@@ -93,6 +93,7 @@ class PrestashopRefund(models.Model):
 class RefundAdapter(Component):
     _name = 'prestashop.refund.adapter'
     _apply_on = 'prestashop.refund'
+    _inherit = 'prestashop.adapter'
 
     _model_name = 'prestashop.refund'
 

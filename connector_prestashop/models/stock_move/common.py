@@ -61,4 +61,4 @@ class PrestashopStockPickingListener(Component):
 
     def on_tracking_number_added(self, record):
         for binding in record.sale_id.prestashop_bind_ids:
-            binding.with_delay().export_tracking_number()
+            binding.export_tracking_number()
