@@ -21,7 +21,9 @@ This module is based on modules in other repositories :
 - https://github.com/OCA/product-attribute.git
 - https://github.com/OCA/e-commerce.git
 - https://github.com/OCA/sale-workflow.git
- 
+- https://github.com/OCA/stock-logistics-warehouse.git
+- https://github.com/OCA/server-tools.git
+
 
 Getting started
 ---------------
@@ -29,7 +31,7 @@ Getting started
 - install the module prestashoperpconnect
   - settings -> modules
   - choose your country accounting
-- install the module  account_accountant 
+- install the module  account_accountant
 - configure the chart of account (it seems that it is not required anymore with ocb branches)
   - in settings -> configuration -> Accounting -> Chart of account
   - set the template for your country

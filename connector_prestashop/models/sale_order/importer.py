@@ -39,7 +39,7 @@ class SaleImportRule(Component):
         """ Never import the order """
         raise NothingToDoJob('Orders with payment modes %s '
                              'are never imported.' %
-                             record['order']['payment']['method'])
+                             record['payment']['method'])
 
     def _rule_paid(self, record, mode):
         """ Import the order only if it has received a payment """
@@ -53,12 +53,12 @@ class SaleImportRule(Component):
             model_name='__not_exist_prestashop.payment'
         )
         payment_ids = payment_adapter.search({
-            'filter[order_reference]': record['order']['reference']
+            'filter[order_reference]': record['reference']
         })
         paid_amount = 0.0
         for payment_id in payment_ids:
             payment = payment_adapter.read(payment_id)
-            paid_amount += float(payment['order_payment']['amount'])
+            paid_amount += float(payment['amount'])
         return paid_amount
 
     _rules = {
@@ -76,7 +76,7 @@ class SaleImportRule(Component):
         :returns: True if the sale order should be imported
         :rtype: boolean
         """
-        ps_payment_method = record['order']['payment']
+        ps_payment_method = record['payment']
         mode_binder = self.binder_for('account.payment.mode')
         payment_mode = mode_binder.to_internal(ps_payment_method)
         if not payment_mode:
@@ -98,14 +98,14 @@ class SaleImportRule(Component):
 
     def _rule_global(self, record, mode):
         """ Rule always executed, whichever is the selected rule """
-        order_id = record['order']['id']
+        order_id = record['id']
         max_days = mode.days_before_cancel
         if not max_days:
             return
         if self._get_paid_amount(record) != 0.0:
             return
         fmt = '%Y-%m-%d %H:%M:%S'
-        order_date = datetime.strptime(record['order']['date_add'], fmt)
+        order_date = datetime.strptime(record['date_add'], fmt)
         if order_date + timedelta(days=max_days) < datetime.now():
             raise NothingToDoJob('Import of the order %s canceled '
                                  'because it has not been paid since %d '
@@ -119,7 +119,7 @@ class SaleImportRule(Component):
         If not, the job fails gracefully.
         """
         if self.backend_record.importable_order_state_ids:
-            ps_state_id = record['order']['current_state']
+            ps_state_id = record['current_state']
             state = self.binder_for('prestashop.sale.order.state'
                                     ).to_internal(ps_state_id, unwrap=1)
             if not state:
@@ -134,7 +134,7 @@ class SaleImportRule(Component):
                 raise NothingToDoJob(_(
                     'Import of the order with PS ID=%s canceled '
                     'because its state is not importable'
-                ) % record['order']['id'])
+                ) % record['id'])
 
 
 class SaleOrderImportMapper(Component):
@@ -151,7 +151,7 @@ class SaleOrderImportMapper(Component):
     ]
 
     def _get_sale_order_lines(self, record):
-        orders = record['order']['associations'].get(
+        orders = record['associations'].get(
             'order_rows', {}).get(
             self.backend_record.get_version_ps_key('order_row'), [])
         if isinstance(orders, dict):
@@ -159,13 +159,13 @@ class SaleOrderImportMapper(Component):
         return orders
 
     def _get_discounts_lines(self, record):
-        if record['order']['total_discounts'] == '0.00':
+        if record['total_discounts'] == '0.00':
             return []
         adapter = self.component(
             usage='backend.adapter',
             model_name='prestashop.sale.order.line.discount'
         )
-        discount_ids = adapter.search({'filter[id_order]': record['order']['id']})
+        discount_ids = adapter.search({'filter[id_order]': record['id']})
         discount_mappers = []
         for discount_id in discount_ids:
             discount_mappers.append({'id': discount_id})
@@ -209,7 +209,7 @@ class SaleOrderImportMapper(Component):
 
     @mapping
     def name(self, record):
-        basename = record['order']['reference']
+        basename = record['reference']
         if not self._sale_order_exists(basename):
             return {"name": basename}
         i = 1
@@ -222,21 +222,27 @@ class SaleOrderImportMapper(Component):
     @mapping
     def partner_id(self, record):
         binder = self.binder_for('prestashop.res.partner')
-        partner = binder.to_internal(record['order']['id_customer'], unwrap=True)
+        partner = binder.to_internal(record['id_customer'], unwrap=True)
         return {'partner_id': partner.id}
 
     @mapping
     def partner_invoice_id(self, record):
-        binder = self.binder_for('prestashop.address')
-        address = binder.to_internal(record['order']['id_address_invoice'], unwrap=True)
-        return {'partner_invoice_id': address.id}
+        if int(record['id_address_invoice']):
+            binder = self.binder_for('prestashop.address')
+            address = binder.to_internal(record['id_address_invoice'], unwrap=True)
+            return {'partner_invoice_id': address.id}
+        else:
+            return {'partner_invoice_id': self.partner_id(record)['partner_id']}
 
     @mapping
     def partner_shipping_id(self, record):
-        binder = self.binder_for('prestashop.address')
-        shipping = binder.to_internal(record['order']['id_address_delivery'],
-                                      unwrap=True)
-        return {'partner_shipping_id': shipping.id}
+        if int(record['id_address_delivery']):
+            binder = self.binder_for('prestashop.address')
+            shipping = binder.to_internal(record['id_address_delivery'],
+                                          unwrap=True)
+            return {'partner_shipping_id': shipping.id}
+        else:
+            return {'partner_shipping_id': self.partner_id(record)['partner_id']}
 
     @mapping
     def pricelist_id(self, record):
@@ -254,28 +260,28 @@ class SaleOrderImportMapper(Component):
     @mapping
     def payment(self, record):
         binder = self.binder_for('account.payment.mode')
-        mode = binder.to_internal(record['order']['payment'])
+        mode = binder.to_internal(record['payment'])
         assert mode, ("import of error fail in SaleImportRule.check "
                       "when the payment mode is missing")
         return {'payment_mode_id': mode.id}
 
     @mapping
     def carrier_id(self, record):
-        if record['order']['id_carrier'] == '0':
+        if record['id_carrier'] == '0':
             return {}
         binder = self.binder_for('prestashop.delivery.carrier')
-        carrier = binder.to_internal(record['order']['id_carrier'], unwrap=True)
+        carrier = binder.to_internal(record['id_carrier'], unwrap=True)
         return {'carrier_id': carrier.id}
 
     @mapping
     def total_tax_amount(self, record):
-        tax = (float(record['order']['total_paid_tax_incl']) -
-               float(record['order']['total_paid_tax_excl']))
+        tax = (float(record['total_paid_tax_incl']) -
+               float(record['total_paid_tax_excl']))
         return {'total_amount_tax': tax}
 
     @mapping
     def date_order(self, record):
-        date_order = record['order']['date_add']
+        date_order = record['date_add']
         if self.backend_record.tz:
             local = pytz.timezone(self.backend_record.tz)
             naive = fields.Datetime.from_string(date_order)
@@ -305,20 +311,20 @@ class SaleOrderImporter(Component):
     def _import_dependencies(self):
         record = self.prestashop_record
         self._import_dependency(
-            record['order']['id_customer'], 'prestashop.res.partner'
+            record['id_customer'], 'prestashop.res.partner'
         )
         self._import_dependency(
-            record['order']['id_address_invoice'], 'prestashop.address'
+            record['id_address_invoice'], 'prestashop.address'
         )
         self._import_dependency(
-            record['order']['id_address_delivery'], 'prestashop.address'
+            record['id_address_delivery'], 'prestashop.address'
         )
 
-        if record['order']['id_carrier'] != '0':
-            self._import_dependency(record['order']['id_carrier'],
+        if record['id_carrier'] != '0':
+            self._import_dependency(record['id_carrier'],
                                     'prestashop.delivery.carrier')
 
-        rows = record['order']['associations'] \
+        rows = record['associations'] \
             .get('order_rows', {}) \
             .get(self.backend_record.get_version_ps_key('order_row'), [])
         if isinstance(rows, dict):
@@ -403,7 +409,7 @@ class SaleOrderLineMapper(Component):
 
     @mapping
     def prestashop_id(self, record):
-        return {'prestashop_id': record['order_detail']['id']}
+        return {'prestashop_id': record['id']}
 
     @mapping
     def price_unit(self, record):
@@ -411,9 +417,9 @@ class SaleOrderLineMapper(Component):
             key = 'unit_price_tax_incl'
         else:
             key = 'unit_price_tax_excl'
-        if record['order_detail']['reduction_percent']:
-            reduction = Decimal(record['order_detail']['reduction_percent'])
-            price = Decimal(record['order_detail'][key])
+        if record['reduction_percent']:
+            reduction = Decimal(record['reduction_percent'])
+            price = Decimal(record[key])
             price_unit = price / ((100 - reduction) / 100)
         else:
             price_unit = record[key]
@@ -426,24 +432,28 @@ class SaleOrderLineMapper(Component):
                 'prestashop.product.combination'
             )
             product = combination_binder.to_internal(
-                record['order_detail']['product_attribute_id'],
+                record['product_attribute_id'],
                 unwrap=True,
             )
         else:
             binder = self.binder_for('prestashop.product.template')
-            template = binder.to_internal(record['order_detail']['product_id'], unwrap=True)
+            template = binder.to_internal(record['product_id'], unwrap=True)
             product = self.env['product.product'].search([
                 ('product_tmpl_id', '=', template.id),
                 '|', ('company_id', '=', self.backend_record.company_id.id),
                 ('company_id', '=', False)],
-                limit=1,
+                limit=1
             )
-        if not product:
-            return {}
-        return {
-            'product_id': product.id,
-            'product_uom': product and product.uom_id.id,
-        }
+        if product:
+            return {
+                'product_id': product.id,
+                'product_uom': product and product.uom_id.id,
+            }
+        else:
+            # Product was deleted from Prestashop but it is still in Sale Order
+            # TODO: It will be better to use some generic product and not Note line
+            # Anyway we are talking about old orders, not a big deal
+            return {'display_type': 'line_note'}
 
     def _find_tax(self, ps_tax_id):
         binder = self.binder_for('prestashop.account.tax')
@@ -464,6 +474,9 @@ class SaleOrderLineMapper(Component):
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
 
+    # @mapping
+    # def display_type(selfself, record):
+
 
 class SaleOrderLineDiscountMapper(Component):
     _name = 'prestashop.sale.order.discount.importer'
@@ -475,16 +488,16 @@ class SaleOrderLineDiscountMapper(Component):
     @mapping
     def discount(self, record):
         return {
-                'name': record['order_cart_rule']['name'],
+                'name': record['name'],
             'product_uom_qty': 1,
         }
 
     @mapping
     def price_unit(self, record):
         if self.backend_record.taxes_included:
-            price_unit = record['order_cart_rule']['value']
+            price_unit = record['value']
         else:
-            price_unit = record['order_cart_rule']['value_tax_excl']
+            price_unit = record['value_tax_excl']
         if price_unit[0] != '-':
             price_unit = '-' + price_unit
         return {'price_unit': price_unit}
@@ -509,4 +522,4 @@ class SaleOrderLineDiscountMapper(Component):
 
     @mapping
     def prestashop_id(self, record):
-        return {'prestashop_id': record['order_cart_rule']['id']}
+        return {'prestashop_id': record['id']}

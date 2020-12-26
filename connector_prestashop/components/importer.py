@@ -56,7 +56,7 @@ class PrestashopBaseImporter(AbstractComponent):
         :type always: boolean
         :param kwargs: additional keyword arguments are passed to the importer
         """
-        if not prestashop_id:
+        if not int(prestashop_id):
             return
         if importer_class is None:
             importer_class = PrestashopImporter
@@ -100,12 +100,12 @@ class PrestashopImporter(AbstractComponent):
         :py:class:`~openerp.addons.connector.unit.mapper.MapRecord`
 
         """
-        if 'customer' in self.prestashop_record:
-            self.prestashop_record = self.prestashop_record['customer']
-        if 'shop' in self.prestashop_record:
-            self.prestashop_record = self.prestashop_record['shop']
-        if 'address' in self.prestashop_record:
-            self.prestashop_record = self.prestashop_record['address']
+        # if 'customer' in self.prestashop_record:
+        #     self.prestashop_record = self.prestashop_record['customer']
+        # if 'shop' in self.prestashop_record:
+        #     self.prestashop_record = self.prestashop_record['shop']
+        # if 'address' in self.prestashop_record:
+        #     self.prestashop_record = self.prestashop_record['address']
         return self.mapper.map_record(self.prestashop_record)
 
     def _validate_data(self, data):
@@ -132,26 +132,25 @@ class PrestashopImporter(AbstractComponent):
         return map_record.values(for_create=True)
 
     def _update_data(self, map_record):
-        test = map_record.values()
-        return test
+        return map_record.values()
 
     def _create(self, data):
         """ Create the OpenERP record """
         # special check on data before import
         self._validate_data(data)
-        if 'shop' in self.prestashop_record:
-            self.prestashop_record = self.prestashop_record['shop']
-        elif 'tax_rule_group' in self.prestashop_record:
-            self.prestashop_record = self.prestashop_record['tax_rule_group']
-        if 'name' in data and 'name_ext' not in data:
-            if 'shop_group' in self.prestashop_record:
-                data['name'] = self.prestashop_record['shop_group']['name']
-            if 'order_state' in self.prestashop_record:
-                data['name'] = self.prestashop_record['order_state']['name']
-            if 'group' in self.prestashop_record:
-                data['name'] = self.prestashop_record['group']['name']
-            if 'name' in self.prestashop_record:
-                data['name'] = self.prestashop_record['name']
+        # if 'shop' in self.prestashop_record:
+        #     self.prestashop_record = self.prestashop_record['shop']
+        # elif 'tax_rule_group' in self.prestashop_record:
+        #     self.prestashop_record = self.prestashop_record['tax_rule_group']
+        # if 'name' in data and 'name_ext' not in data:
+        #     if 'shop_group' in self.prestashop_record:
+        #         data['name'] = self.prestashop_record['shop_group']['name']
+        #     if 'order_state' in self.prestashop_record:
+        #         data['name'] = self.prestashop_record['order_state']['name']
+        #     if 'group' in self.prestashop_record:
+        #         data['name'] = self.prestashop_record['group']['name']
+        #     if 'name' in self.prestashop_record:
+        #         data['name'] = self.prestashop_record['name']
         binding = self.model.with_context(
             **self._create_context()
         ).create(data)
@@ -302,7 +301,7 @@ class PrestashopImporter(AbstractComponent):
 
         map_record = self._map_data()
         if self.work.model_name == 'prestashop.account.tax.group':
-            if map_record.source['tax_rule_group']['active'] == '1' and map_record.source['tax_rule_group']['deleted'] == '0':
+            if map_record.source['active'] == '1' and map_record.source['deleted'] == '0':
                 if binding:
                     record = self._update_data(map_record)
                 else:
@@ -324,9 +323,6 @@ class PrestashopImporter(AbstractComponent):
                 record = self._update_data(map_record)
             else:
                 record = self._create_data(map_record)
-
-            # special check on data before import
-            self._validate_data(record)
 
             if binding:
                 self._update(binding, record)
@@ -471,10 +467,6 @@ class TranslatableRecordImporter(AbstractComponent):
         languages = {}
         for field in self._translatable_fields[self.model._name]:
             # TODO FIXME in prestapyt
-            if 'order_state' in record:
-                record = record['order_state']
-            elif 'group' in record:
-                record = record['group']
             if not isinstance(record[field]['language'], list):
                 record[field]['language'] = [record[field]['language']]
             for language in record[field]['language']:
@@ -502,14 +494,6 @@ class TranslatableRecordImporter(AbstractComponent):
             }
         """
         split_record = {}
-        if 'category' in record:
-            record = record['category']
-        elif 'product' in record:
-            record = record['product']
-        elif 'order_state' in record:
-            record = record['order_state']
-        elif 'group' in record:
-            record = record['group']
         languages = self.find_each_language(record)
         if not languages:
             raise FailedJobError(

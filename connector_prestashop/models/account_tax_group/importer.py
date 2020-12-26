@@ -31,7 +31,7 @@ class TaxGroupMapper(Component):
     @mapping
     def odoo_id(self, record):
         tax_group = self.env['account.tax.group'].search([
-            ('name', '=', record['tax_rule_group']['name'])
+            ('name', '=', record['name'])
         ])
         if tax_group:
             return {'odoo_id': tax_group.id}

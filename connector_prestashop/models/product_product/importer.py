@@ -78,7 +78,7 @@ class ProductCombinationImporter(Component):
                 pass
 
     def import_supplierinfo(self, binding):
-        ps_id = self._get_prestashop_data()['combination']['id']
+        ps_id = self._get_prestashop_data()['id']
         filters = {
             # 'filter[id_product]': ps_id,
             'filter[id_product_attribute]': ps_id
@@ -109,7 +109,7 @@ class ProductCombinationMapper(Component):
 
     @mapping
     def combination_default(self, record):
-        return {'default_on': bool(int(record['combination']['default_on'] or 0))}
+        return {'default_on': bool(int(record['default_on'] or 0))}
 
     @mapping
     def product_tmpl_id(self, record):
@@ -136,7 +136,7 @@ class ProductCombinationMapper(Component):
 
     def get_main_template_binding(self, record):
         template_binder = self.binder_for('prestashop.product.template')
-        return template_binder.to_internal(record['combination']['id_product'])
+        return template_binder.to_internal(record['id_product'])
 
     def _get_option_value(self, record):
         option_values = record.get('associations', {}).get(
@@ -180,10 +180,10 @@ class ProductCombinationMapper(Component):
     def default_code(self, record):
         code = record.get('reference')
         if not code:
-            code = "%s_%s" % (record['combination']['id_product'], record['combination']['id'])
+            code = "%s_%s" % (record['id_product'], record['id'])
         if not self._template_code_exists(code):
             return {'default_code': code}
-        i = 1
+        i = 2
         current_code = '%s_%s' % (code, i)
         while self._template_code_exists(current_code):
             i += 1
@@ -215,7 +215,7 @@ class ProductCombinationMapper(Component):
         tax_group = product_tmpl_adapter.read(record['id_product'])
         tax_group = self.binder_for(
             'prestashop.account.tax.group').to_internal(
-                tax_group['product']['id_tax_rules_group'], unwrap=True)
+                tax_group['id_tax_rules_group'], unwrap=True)
         return tax_group.tax_ids
 
     def _apply_taxes(self, tax, price):
@@ -233,13 +233,13 @@ class ProductCombinationMapper(Component):
     def specific_price(self, record):
         product = self.binder_for(
             'prestashop.product.combination').to_internal(
-            record['combination']['id'], unwrap=True
+            record['id'], unwrap=True
         )
         product_template = self.binder_for(
-            'prestashop.product.template').to_internal(record['combination']['id_product'])
-        tax = product.product_tmpl_id.taxes_id[:1] or self._get_tax_ids(record['combination'])
-        impact = float(self._apply_taxes(tax, float(record['combination']['price'] or '0.0')))
-        cost_price = float(record['combination']['wholesale_price'] or '0.0')
+            'prestashop.product.template').to_internal(record['id_product'])
+        tax = product.product_tmpl_id.taxes_id[:1] or self._get_tax_ids(record)
+        impact = float(self._apply_taxes(tax, float(record['price'] or '0.0')))
+        cost_price = float(record['wholesale_price'] or '0.0')
         return {
             'list_price': product_template.list_price,
             'standard_price': cost_price or product_template.wholesale_price,

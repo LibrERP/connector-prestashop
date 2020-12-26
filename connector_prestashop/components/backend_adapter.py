@@ -195,6 +195,7 @@ class GenericAdapter(AbstractComponent):
         _logger.debug(
             'method read, model %s id %s, attributes %s',
             self._prestashop_model, str(id), str(attributes))
+
         res = self.client.get(self._prestashop_model, id, options=attributes)
         if self._prestashop_model == 'carriers':
             deliveries_id = self.client.search('deliveries', {'filter[id_carrier]': res['carrier']['id']})
@@ -206,7 +207,10 @@ class GenericAdapter(AbstractComponent):
                 res.update({
                     'price_range': price_range
                 })
-        return res
+            return res
+        else:
+            first_key = list(res)[0]
+            return res[first_key]
 
     def create(self, attributes=None):
         """ Create a record on the external system """

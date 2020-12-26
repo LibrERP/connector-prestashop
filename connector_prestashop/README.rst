@@ -46,18 +46,18 @@ library in Odoo server side, called prestapyt, download it from:
 
 https://github.com/prestapyt/prestapyt.git
 
-Or you can use pip install system to install it
+Attention! For the compatibility with Python 3.x you need the last version. You can use pip to install it::
 
-sudo pip3 install prestapyt
+    pip install --ignore-installed git+https://github.com/prestapyt/prestapyt.git@master
 
 Requires "base_multi_image module", on version 12 it's available from:
 
-https://github.com/PESOL/server-tools/tree/12.0-mig-base_multi_image
+https://github.com/PESOL/server-tools.git
 
-Finally install "vcr" python library :
+Install "vcr" python library and freezegun ::
 
-apt-get install python3-vcr
-
+    pip install vcrpy
+    pip install freezegun
 
 Configuration
 =============

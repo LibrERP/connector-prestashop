@@ -85,9 +85,9 @@ class ProductCategoryImporter(Component):
 
     def _import_dependencies(self):
         record = self.prestashop_record
-        if record['category']['id_parent'] != '0':
+        if record['id_parent'] != '0':
             try:
-                self._import_dependency(record['category']['id_parent'],
+                self._import_dependency(record['id_parent'],
                                         'prestashop.product.category')
             except PrestaShopWebServiceError as e: #prima era PrestaShopWebServiceError, e
                 msg = _(
@@ -96,13 +96,13 @@ class ProductCategoryImporter(Component):
                     'Error: %s'
                 )
                 binder = self.binder_for()
-                category = binder.to_internal(record['category']['id'])
+                category = binder.to_internal(record['id'])
                 if category:
                     name = category.name
                 else:
                     # not imported yet, retrieve name in default lang
                     values = self._split_per_language(
-                        record['category'], fields=['name', ])
+                        record, fields=['name', ])
                     name = values[self._default_language]['name']
 
                 self.backend_record.add_checkpoint(

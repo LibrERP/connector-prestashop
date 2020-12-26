@@ -20,9 +20,9 @@ class ShopGroupMapper(Component):
 
     direct = [('name', 'name')]
 
-    @mapping
-    def name(self, record):
-        name = record['shop_group']['name']
-        if name is None:
-            name = _('Undefined')
-        return {'name': name}
+    # @mapping
+    # def name(self, record):
+    #     name = record['name']
+    #     if name is None:
+    #         name = _('Undefined')
+    #     return {'name': name}

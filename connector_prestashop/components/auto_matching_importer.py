@@ -66,14 +66,14 @@ class AutoMatchingImporter(Component):
                 # PS IDs not mapped => I try to match between the PS ID and
                 # the OE ID. First, I read field in PS
                 ps_dict = adapter.read(ps_id)
-                if record._name == 'prestashop.res.lang':
-                    ps_dict = ps_dict['language']
-                elif record._name == 'prestashop.res.country':
-                    ps_dict = ps_dict['country']
-                elif record._name == 'prestashop.res.currency':
-                    ps_dict = ps_dict['currency']
-                elif record._name == 'prestashop.account.tax':
-                    ps_dict = ps_dict['tax']
+                # if record._name == 'prestashop.res.lang':
+                #     ps_dict = ps_dict['language']
+                # elif record._name == 'prestashop.res.country':
+                #     ps_dict = ps_dict['country']
+                # elif record._name == 'prestashop.res.currency':
+                #     ps_dict = ps_dict['currency']
+                # elif record._name == 'prestashop.account.tax':
+                #     ps_dict = ps_dict['tax']
                     # ps_dict['name'] = ps_dict['name']['language']
                 mapping_found = False
                 # Loop on OE IDs

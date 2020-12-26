@@ -5,3 +5,4 @@ product-attribute
 product-variant
 sale-workflow
 stock-logistics-warehouse
+server-tools

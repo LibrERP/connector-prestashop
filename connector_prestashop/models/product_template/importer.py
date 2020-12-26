@@ -656,9 +656,9 @@ class ProductTemplateImporter(Component):
 
     def _import_default_category(self):
         record = self.prestashop_record
-        if int(record['product']['id_category_default']):
+        if int(record['id_category_default']):
             try:
-                self._import_dependency(record['product']['id_category_default'],
+                self._import_dependency(record['id_category_default'],
                                         'prestashop.product.category')
             except PrestaShopWebServiceError:
                 # a checkpoint will be added in _after_import (because
