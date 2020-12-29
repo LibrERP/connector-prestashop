@@ -8,7 +8,7 @@
 
 {
     "name": "PrestaShop-Odoo connector",
-    "version": "12.0.6.11.4",
+    "version": "12.0.6.12.4",
     "license": "AGPL-3",
     "depends": [
         "account",
@@ -16,7 +16,7 @@
         "product",
         "product_multi_category",   # oca/product-attribute
         "connector_ecommerce",      # oca/connector-ecommerce
-        "base_multi_image",         # https://github.com/PESOL/server-tools/tree/12.0-mig-base_multi_image
+        "base_multi_image",         # https://github.com/LibrERP/connector-prestashop
         "purchase",
         # "product_variant_supplierinfo",  # oca/product-variant
         "stock_available",          # oca/stock-logistics-warehouse

@@ -33,7 +33,7 @@ If you want to export from Odoo to PrestaShop changes made on the products,
 product categories or product images, you need to install
 *connector_prestashop_catalog_manager* module in this same repository.
 
-This connector supports PrestaShop version up to 1.6.11. Maybe later versions
+This connector supports PrestaShop version up to 1.7.6.5. Maybe later versions
 are also supported, but they haven't been tested. It uses the webservices of
 PrestaShop.
 
@@ -50,9 +50,6 @@ Attention! For the compatibility with Python 3.x you need the last version. You 
 
     pip install --ignore-installed git+https://github.com/prestapyt/prestapyt.git@master
 
-Requires "base_multi_image module", on version 12 it's available from:
-
-https://github.com/PESOL/server-tools.git
 
 Install "vcr" python library and freezegun ::
 
@@ -107,6 +104,8 @@ Steps in Odoo
   * PrestaShop - Import Sales Orders
   * PrestaShop - Import suppliers
   * PrestaShop - Payment methods
+#. Verify Payment Methods: Go to 'Invoicing > Configuration > Management > Payment Modes'
+and control if Journal is correct
 
 Usage
 =====

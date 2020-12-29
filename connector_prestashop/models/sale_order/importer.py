@@ -320,7 +320,12 @@ class SaleOrderImporter(Component):
             record['id_address_delivery'], 'prestashop.address'
         )
 
-        if record['id_carrier'] != '0':
+        # If we make a look up for a deleted carrier we will receive 404 from Prestashop
+        delivery_carrier_bindings = self.env['prestashop.delivery.carrier'].search([])
+        white_list = [carrier.prestashop_id for carrier in delivery_carrier_bindings]
+        white_list += [carrier.id_reference for carrier in delivery_carrier_bindings]
+        if int(record['id_carrier']) in set(white_list):
+        # if record['id_carrier'] != '0':
             self._import_dependency(record['id_carrier'],
                                     'prestashop.delivery.carrier')
 
@@ -344,7 +349,7 @@ class SaleOrderImporter(Component):
                           if self.backend_record.taxes_included
                           else binding.total_shipping_tax_excluded)
         # when we have a carrier_id, even with a 0.0 price,
-        # Odoo will adda a shipping line in the SO when the picking
+        # Odoo will add a shipping line in the SO when the picking
         # is done, so we better add the line directly even when the
         # price is 0.0
         if binding.odoo_id.carrier_id:
@@ -488,13 +493,13 @@ class SaleOrderLineDiscountMapper(Component):
     @mapping
     def discount(self, record):
         return {
-                'name': record['name'],
+            'name': record['name'],
             'product_uom_qty': 1,
         }
 
     @mapping
     def price_unit(self, record):
-        if self.backend_record.taxes_included:
+        if self.backend_record.taxes_included or self.backend_record.discount_taxes_included:
             price_unit = record['value']
         else:
             price_unit = record['value_tax_excl']
@@ -506,9 +511,10 @@ class SaleOrderLineDiscountMapper(Component):
     def product_id(self, record):
         if self.backend_record.discount_product_id:
             return {'product_id': self.backend_record.discount_product_id.id}
-        product_discount = self.env.ref(
-            'connector_ecommerce.product_product_discount')
-        return {'product_id': product_discount.id}
+        else:
+            product_discount = self.env.ref(
+                'connector_ecommerce.product_product_discount')
+            return {'product_id': product_discount.id}
 
     @mapping
     def tax_id(self, record):

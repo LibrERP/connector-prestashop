@@ -122,6 +122,34 @@ class PrestashopImporter(AbstractComponent):
         """Return the openerp id from the prestashop id"""
         return self.binder.to_internal(self.prestashop_id)
 
+    def _get_binding_from_data(self, record, unique_fields):
+        for field in unique_fields:
+            if field in record:
+                odoo = self.model.odoo_id.search([
+                    (field, '=', record[field])
+                ])
+                if odoo:
+                    # TODO: Andrei: Investigate why this happens
+                    duplicated = self.model.search([
+                        ('odoo_id', '=', odoo.id)
+                    ])
+                    if duplicated:
+                        error_message = 'Duplicated {field}: {value}\n'.format(field=field, value=record[field])
+                        _logger.debug(error_message)
+                        # TODO: make logs directory if doesn't exists
+                        with open('../logs/duplicated.txt', 'a') as f:
+                            f.write(error_message)
+                        return -1
+                    else:
+                        record['odoo_id'] = odoo.id
+                        binding = self.model.with_context(
+                            **self._create_context()
+                        ).create(record)
+                        _logger.debug(
+                            '%d created from odoo %s', binding, odoo.id)
+                        return binding
+        return False
+
     def _context(self, **kwargs):
         return dict(self._context, connector_no_export=True, **kwargs)
 
@@ -309,29 +337,34 @@ class PrestashopImporter(AbstractComponent):
 
                 # special check on data before import
                 self._validate_data(record)
-
-                if binding:
-                    self._update(binding, record)
-                else:
-                    binding = self._create(record)
-
-                self.binder.bind(self.prestashop_id, binding)
-
-                self._after_import(binding)
+            else:
+                return
         else:
             if binding:
                 record = self._update_data(map_record)
             else:
                 record = self._create_data(map_record)
 
-            if binding:
-                self._update(binding, record)
-            else:
-                binding = self._create(record)
+            # special check on data before import
+            self._validate_data(record)
 
-            self.binder.bind(self.prestashop_id, binding)
+            # Try to bind external products with products already in Odoo
+            if self.work.model_name in ('prestashop.product.template', 'prestashop.product.product',
+                                        'prestashop.product.combination') and not binding:
+                binding = self._get_binding_from_data(record, ('barcode', 'default_code'))
+                if binding == -1:
+                    # Odoo product is already binded to another product
+                    # Should never happen
+                    return
 
-            self._after_import(binding)
+        if binding:
+            self._update(binding, record)
+        else:
+            binding = self._create(record)
+
+        self.binder.bind(self.prestashop_id, binding)
+
+        self._after_import(binding)
 
 
 class BatchImporter(AbstractComponent):

@@ -29,12 +29,11 @@ class PaymentModeBatchImporter(Component):
         payment_method = self.env.ref(method_xmlid, raise_if_not_found=False)
         if not payment_method:
             return
-        journals = self.env['account.journal'].search(
-            [('type', '=', 'bank'),
-             ('company_id', '=', self.backend_record.company_id.id),
-             ],
-        )
-        if len(journals) != 1:
+        journals = self.env['account.journal'].search([
+            ('type', '=', 'bank'),
+            ('company_id', '=', self.backend_record.company_id.id),
+        ])
+        if len(journals) < 1:
             sequence_record = self.env['ir.sequence'].create({
                 'name': 'bnk Sequence',
                 'implementation': 'no_gap',
@@ -42,17 +41,22 @@ class PaymentModeBatchImporter(Component):
                 'number_increment': 1,
                 'padding': 4
             })
-            journals = self.env['account.journal'].create({
-                'name': 'Kalamitica Bank',
+            journal = self.env['account.journal'].create({
+                'name': 'Ecommerce Bank',
                 'code': 'bnk',
                 'type': 'bank',
                 'sequence_id': sequence_record.id
             })
+        if len(journals) == 1:
+            journal = journals[0]
+        elif len(journals) > 1:
+            journal = journals[0]
+
         mode = self.model.create({
             'name': record['payment'],
             'company_id': self.backend_record.company_id.id,
             'bank_account_link': 'fixed',
-            'fixed_journal_id': journals.id,
+            'fixed_journal_id': journal.id,
             'payment_method_id': payment_method.id
         })
 

@@ -197,20 +197,18 @@ class GenericAdapter(AbstractComponent):
             self._prestashop_model, str(id), str(attributes))
 
         res = self.client.get(self._prestashop_model, id, options=attributes)
+        first_key = list(res)[0]
+        values = res[first_key]
         if self._prestashop_model == 'carriers':
-            deliveries_id = self.client.search('deliveries', {'filter[id_carrier]': res['carrier']['id']})
+            deliveries_id = self.client.search('deliveries', {'filter[id_carrier]': values['id']})
             if deliveries_id:
                 range_price_id = self.client.get('deliveries', deliveries_id[0], options=None)['delivery'][
                     'id_range_price']
                 price_range = format(float(
                     self.client.get("price_ranges", range_price_id, options=None)['price_range']['delimiter1']))
-                res.update({
-                    'price_range': price_range
-                })
-            return res
-        else:
-            first_key = list(res)[0]
-            return res[first_key]
+                values['price_range'] = price_range
+
+        return values
 
     def create(self, attributes=None):
         """ Create a record on the external system """

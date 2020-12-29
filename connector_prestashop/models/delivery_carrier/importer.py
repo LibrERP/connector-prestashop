@@ -34,7 +34,7 @@ class CarrierImportMapper(Component):
         Prevent The duplication of delivery method if id_reference is the same
         Has to be improved
         """
-        id_reference = int(str(record['carrier']['id_reference']))
+        id_reference = int(str(record['id_reference']))
         ps_delivery = self.env['prestashop.delivery.carrier'].search([
             ('id_reference', '=', id_reference),
             ('backend_id', '=', self.backend_record.id)])
@@ -51,12 +51,12 @@ class CarrierImportMapper(Component):
 
     @mapping
     def id_reference(self, record):
-        id_reference = int(str(record['carrier']['id_reference']))
+        id_reference = int(str(record['id_reference']))
         return {'id_reference': id_reference}
 
     @mapping
     def active(self, record):
-        return {'active_ext': record['carrier']['active'] == '1'}
+        return {'active_ext': record['active'] == '1'}
 
     @mapping
     def backend_id(self, record):
@@ -68,22 +68,27 @@ class CarrierImportMapper(Component):
 
     @mapping
     def product_id(self, record):
-        template_record = self.env['product.template'].search([('name', 'ilike', record['carrier']['name'])])
-        list_price = 0.0
-        if len(record) > 1:
+        default_code = 'Delivery_{}'.format(record['id'])
+
+        template_record = self.env['product.template'].search([('default_code', '=', default_code)])
+
+        if 'price_range' in record:
             list_price = float(record['price_range'])
+        else:
+            list_price = 0.0
+
         if template_record:
             product_record = template_record.product_variant_id[0]
             if list_price != 0.0:
                 template_record.write({
-                    'name': record['carrier']['name'],
                     'list_price': list_price,
                     'standard_price': list_price
                 })
             return {'product_id': product_record.id}
         else:
             template_new = self.env['product.template'].create({
-                'name': record['carrier']['name'],
+                'name': record['name'],
+                'default_code': default_code,
                 'type': 'service',
                 'categ_id': 1,
                 'uom_id': 1,
@@ -102,20 +107,13 @@ class CarrierImportMapper(Component):
             })
             return {'product_id': product_new.id}
 
-    def _map_direct(self, record, from_attr, to_attr):
-        record = record['carrier']
-        res = super(CarrierImportMapper, self)._map_direct(record,
-                                                              from_attr,
-                                                              to_attr)
-        return res
-
-
 
 class DeliveryCarrierBatchImporter(Component):
     """ Import the PrestaShop Carriers.
     """
     _name = 'prestashop.delivery.carrier.delayed.batch.importer'
-    _inherit = 'prestashop.delayed.batch.importer'
+    # _inherit = 'prestashop.delayed.batch.importer'
+    _inherit = 'prestashop.direct.batch.importer'
     _apply_on = 'prestashop.delivery.carrier'
 
     _model_name = ['prestashop.delivery.carrier']

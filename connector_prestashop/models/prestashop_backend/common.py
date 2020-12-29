@@ -115,6 +115,11 @@ class PrestashopBackend(models.Model):
         required=True,
         string='Discount Product',
     )
+    # https://www.prestashop.com/forums/topic/296338-how-to-disable-tax-on-amount-of-discount/
+    discount_taxes_included = fields.Boolean(
+        string="Discount price tax included",
+        help="Prestashop has discounts with taxes"
+    )
     shipping_product_id = fields.Many2one(
         comodel_name='product.product',
         index=True,
