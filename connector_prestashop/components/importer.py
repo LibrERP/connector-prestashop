@@ -139,6 +139,7 @@ class PrestashopImporter(AbstractComponent):
                         _logger.debug(error_message)
                         # Create logs directory if it doesn't exists
                         if not os.path.isdir('../logs/'):
+                            _logger.debug("Trying to create directory '{}'".format(os.getcwd()))
                             os.mkdir('../logs/')
                         with open('../logs/duplicated.txt', 'a') as f:
                             f.write(error_message)
