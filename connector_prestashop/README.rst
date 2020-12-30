@@ -107,6 +107,8 @@ Steps in Odoo
 #. Verify Payment Methods: Go to 'Invoicing > Configuration > Management > Payment Modes'
 and control if Journal is correct
 
+It may be necessary to increase max_locks_per_transaction in postgresql.conf
+
 Usage
 =====
 
