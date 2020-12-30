@@ -7,6 +7,7 @@ from contextlib import closing, contextmanager
 import odoo
 from odoo import _
 from odoo import registry
+import os
 
 from odoo.addons.queue_job.exception import (
     RetryableJobError,
@@ -129,14 +130,16 @@ class PrestashopImporter(AbstractComponent):
                     (field, '=', record[field])
                 ])
                 if odoo:
-                    # TODO: Andrei: Investigate why this happens
+                    # TODO: Investigate why this happens
                     duplicated = self.model.search([
                         ('odoo_id', '=', odoo.id)
                     ])
                     if duplicated:
                         error_message = 'Duplicated {field}: {value}\n'.format(field=field, value=record[field])
                         _logger.debug(error_message)
-                        # TODO: make logs directory if doesn't exists
+                        # Create logs directory if it doesn't exists
+                        if not os.path.isdir('../logs/'):
+                            os.mkdir('../logs/')
                         with open('../logs/duplicated.txt', 'a') as f:
                             f.write(error_message)
                         return -1
