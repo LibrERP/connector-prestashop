@@ -340,6 +340,11 @@ class PrestashopImporter(AbstractComponent):
 
                 # special check on data before import
                 self._validate_data(record)
+                binding = self._get_binding_from_data(record, ['name'])
+                if binding == -1:
+                    # Odoo product is already binded to another product
+                    # Should never happen
+                    return
             else:
                 return
         else:
