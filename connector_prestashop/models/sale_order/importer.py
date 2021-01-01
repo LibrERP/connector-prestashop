@@ -321,11 +321,13 @@ class SaleOrderImporter(Component):
         )
 
         # If we make a look up for a deleted carrier we will receive 404 from Prestashop
-        delivery_carrier_bindings = self.env['prestashop.delivery.carrier'].search([])
-        white_list = [carrier.prestashop_id for carrier in delivery_carrier_bindings]
-        white_list += [carrier.id_reference for carrier in delivery_carrier_bindings]
-        if int(record['id_carrier']) in set(white_list):
-        # if record['id_carrier'] != '0':
+        # delivery_carrier_bindings = self.env['prestashop.delivery.carrier'].search([])
+        # white_list = [carrier.prestashop_id for carrier in delivery_carrier_bindings]
+        # white_list += [carrier.id_reference for carrier in delivery_carrier_bindings]
+        # if int(record['id_carrier']) in set(white_list):
+        # Unfortunately it doesn't work like expected. Don't delete carriers
+
+        if record['id_carrier'] != '0':
             self._import_dependency(record['id_carrier'],
                                     'prestashop.delivery.carrier')
 
@@ -379,10 +381,23 @@ class SaleOrderImporter(Component):
             message=msg,
         )
 
+    def _has_deleted_records(self):
+        binder = self.binder_for('prestashop.res.partner')
+        binding = binder.to_internal(self.prestashop_record['id_customer'])
+
+        if binding:
+            return False
+        else:
+            return True
+
     def _has_to_skip(self):
         """ Return True if the import can be skipped """
         if self._get_binding():
             return True
+
+        if self._has_deleted_records():
+            return True
+
         rules = self.component(usage='sale.import.rule')
         try:
             return rules.check(self.prestashop_record)

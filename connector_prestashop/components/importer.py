@@ -154,6 +154,26 @@ class PrestashopImporter(AbstractComponent):
                         return binding
         return False
 
+    def no_overlap(self, record, field):
+        value = record[field]
+        counter = 1
+        odoo_id = record.get('odoo_id')
+
+        while odoo_id and self.model.search([
+            ('odoo_id', '=', odoo_id),
+            ('backend_id', '=', record['backend_id'])
+        ]):
+            counter += 1
+            value = '{}_{}'.format(record[field], counter)
+            odoo = self.model.odoo_id.search([
+                (field, '=', value)
+            ], limit=1)
+            odoo_id = odoo and odoo.id or False
+            if 'odoo_id' in record:
+                del record['odoo_id']
+        record[field] = value
+        return record
+
     def _context(self, **kwargs):
         return dict(self._context, connector_no_export=True, **kwargs)
 
@@ -170,19 +190,6 @@ class PrestashopImporter(AbstractComponent):
         """ Create the OpenERP record """
         # special check on data before import
         self._validate_data(data)
-        # if 'shop' in self.prestashop_record:
-        #     self.prestashop_record = self.prestashop_record['shop']
-        # elif 'tax_rule_group' in self.prestashop_record:
-        #     self.prestashop_record = self.prestashop_record['tax_rule_group']
-        # if 'name' in data and 'name_ext' not in data:
-        #     if 'shop_group' in self.prestashop_record:
-        #         data['name'] = self.prestashop_record['shop_group']['name']
-        #     if 'order_state' in self.prestashop_record:
-        #         data['name'] = self.prestashop_record['order_state']['name']
-        #     if 'group' in self.prestashop_record:
-        #         data['name'] = self.prestashop_record['group']['name']
-        #     if 'name' in self.prestashop_record:
-        #         data['name'] = self.prestashop_record['name']
         binding = self.model.with_context(
             **self._create_context()
         ).create(data)
@@ -369,6 +376,9 @@ class PrestashopImporter(AbstractComponent):
         if binding:
             self._update(binding, record)
         else:
+            if self.work.model_name == 'prestashop.product.combination.option':
+                record = self.no_overlap(record, 'name')
+
             binding = self._create(record)
 
         self.binder.bind(self.prestashop_id, binding)

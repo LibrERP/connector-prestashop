@@ -187,16 +187,16 @@ class GenericAdapter(AbstractComponent):
             self._prestashop_model, str(filters))
         return self.client.search(self._prestashop_model, filters)
 
-    def read(self, id, attributes=None):
+    def read(self, prestashop_id, attributes=None):
         """ Returns the information of a record
 
         :rtype: dict
         """
         _logger.debug(
             'method read, model %s id %s, attributes %s',
-            self._prestashop_model, str(id), str(attributes))
+            self._prestashop_model, str(prestashop_id), str(attributes))
 
-        res = self.client.get(self._prestashop_model, id, options=attributes)
+        res = self.client.get(self._prestashop_model, prestashop_id, options=attributes)
         first_key = list(res)[0]
         values = res[first_key]
         if self._prestashop_model == 'carriers':
