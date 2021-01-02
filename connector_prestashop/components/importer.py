@@ -345,14 +345,6 @@ class PrestashopImporter(AbstractComponent):
                     record = self._update_data(map_record)
                 else:
                     record = self._create_data(map_record)
-
-                # special check on data before import
-                self._validate_data(record)
-                binding = self._get_binding_from_data(record, ['name'])
-                if binding == -1:
-                    # Odoo product is already binded to another product
-                    # Should never happen
-                    return
             else:
                 return
         else:
@@ -361,17 +353,17 @@ class PrestashopImporter(AbstractComponent):
             else:
                 record = self._create_data(map_record)
 
-            # special check on data before import
-            self._validate_data(record)
+                # Try to bind external products with products already in Odoo
+                # if self.work.model_name in ('prestashop.product.template', 'prestashop.product.product',
+                #                             'prestashop.product.combination') and not binding:
+                #     binding = self._get_binding_from_data(record, ('default_code', 'barcode'))
+                #     if binding == -1:
+                #         # Odoo product is already binded to another product
+                #         # Should never happen
+                #         return
 
-            # Try to bind external products with products already in Odoo
-            if self.work.model_name in ('prestashop.product.template', 'prestashop.product.product',
-                                        'prestashop.product.combination') and not binding:
-                binding = self._get_binding_from_data(record, ('barcode', 'default_code'))
-                if binding == -1:
-                    # Odoo product is already binded to another product
-                    # Should never happen
-                    return
+        # special check on data before import
+        self._validate_data(record)
 
         if binding:
             self._update(binding, record)

@@ -30,11 +30,36 @@ class TaxGroupMapper(Component):
     @only_create
     @mapping
     def odoo_id(self, record):
+
         tax_group = self.env['account.tax.group'].search([
             ('name', '=', record['name'])
         ])
         if tax_group:
-            return {'odoo_id': tax_group.id}
+            already_binded = self.check_binding(record, tax_group.id)
+            if already_binded:
+                return {
+                    'name': already_binded['new_name']
+                }
+            else:
+                return {'odoo_id': tax_group.id}
+
+    def check_binding(self, record, odoo_id):
+        counter = 1
+        while odoo_id and self.model.search([
+            ('odoo_id', '=', odoo_id),
+            ('backend_id', '=', self.backend_record.id)
+        ]):
+            counter += 1
+            name = '{} {}'.format(record['name'], counter)
+            odoo = self.model.odoo_id.search([
+                ('name', '=', name)
+            ], limit=1)
+            odoo_id = odoo and odoo.id or False
+
+        if counter == 1:
+            return False
+        else:
+            return {'new_name': name}
 
 
 class TaxGroupImporter(Component):

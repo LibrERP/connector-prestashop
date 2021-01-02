@@ -166,34 +166,46 @@ class ProductCombinationMapper(Component):
         template_binding = self.get_main_template_binding(record)
         return {'main_template_id': template_binding.id}
 
-    def _template_code_exists(self, code):
+    def _template_code_exists(self, field, code, default_code=None):
         model = self.env['product.product']
-        combination_binder = self.binder_for('prestashop.product.combination')
-        template_ids = model.search([
-            ('default_code', '=', code),
+        template_binder = self.binder_for('prestashop.product.template')
+        product_combination_binder = self.binder_for('prestashop.product.combination')
+
+        product_id = model.search([
+            (field, '=', code),
             ('company_id', '=', self.backend_record.company_id.id),
         ], limit=1)
-        return template_ids and not combination_binder.to_external(
-            template_ids, wrap=True)
 
+        if default_code:
+            return product_id and (not product_id.default_code == default_code or
+                                   (template_binder.to_external(product_id.product_tmpl_id, wrap=True) or
+                                    product_combination_binder.to_external(product_id, wrap=True)))
+        else:
+            return product_id and \
+               (template_binder.to_external(product_id.product_tmpl_id, wrap=True) or
+                product_combination_binder.to_external(product_id, wrap=True))
+
+    @only_create
     @mapping
     def default_code(self, record):
         code = record.get('reference')
         if not code:
             code = "%s_%s" % (record['id_product'], record['id'])
-        if not self._template_code_exists(code):
-            return {'default_code': code}
-        i = 2
-        current_code = '%s_%s' % (code, i)
-        while self._template_code_exists(current_code):
-            i += 1
+        if self._template_code_exists('default_code', code):
+            i = 2
             current_code = '%s_%s' % (code, i)
-        return {'default_code': current_code}
+            while self._template_code_exists('default_code', current_code):
+                i += 1
+                current_code = '%s_%s' % (code, i)
+            return {'default_code': current_code}
+        else:
+            return {'default_code': code}
 
 #     @mapping
 #     def backend_id(self, record):
 #         return {'backend_id': self.backend_record.id}
 
+    @only_create
     @mapping
     def barcode(self, record):
         barcode = record.get('barcode') or record.get('ean13')
@@ -206,8 +218,36 @@ class ProductCombinationMapper(Component):
             template = backend_adapter.read(record['id_product'])
             barcode = template.get('barcode') or template.get('ean13')
         if barcode and barcode != '0' and check_ean(barcode):
-            return {'barcode': barcode}
-        return {}
+            default_code = self.default_code(record)['default_code']
+            if self._template_code_exists('barcode', barcode, default_code):
+                i = 2
+                current_code = '%s_%s' % (barcode, i)
+                while self._template_code_exists('barcode', current_code, default_code):
+                    i += 1
+                    current_code = '%s_%s' % (barcode, i)
+                return {'barcode': current_code}
+            else:
+                return {'barcode': barcode}
+        else:
+            return {}
+
+    def check_binding(self, record, odoo_id):
+        counter = 1
+        while odoo_id and self.model.search([
+            ('odoo_id', '=', odoo_id),
+            ('backend_id', '=', self.backend_record.id)
+        ]):
+            counter += 1
+            name = '{} {}'.format(self.name(record)['name'], counter)
+            odoo = self.model.odoo_id.search([
+                ('name', '=', name)
+            ], limit=1)
+            odoo_id = odoo and odoo.id or False
+
+        if counter == 1:
+            return False
+        else:
+            return {'new_name': name}
 
     def _get_tax_ids(self, record):
         product_tmpl_adapter = self.component(
@@ -258,14 +298,16 @@ class ProductCombinationMapper(Component):
 
         """ Will bind the product to an existing one with the same code """
         if self.backend_record.matching_product_template:
-            code = record.get(self.backend_record.matching_product_ch)
+            # code = record.get(self.backend_record.matching_product_ch)
             if self.backend_record.matching_product_ch == 'reference':
+                code = self.default_code(record)['default_code']
                 if code:
                     product = self.env['product.product'].search(
                         [('default_code', '=', code)], limit=1)
                     if product:
-                            return {'odoo_id': product.id}
+                        return {'odoo_id': product.id}
             if self.backend_record.matching_product_ch == 'barcode':
+                code = self.barcode(record)['barcode']
                 if code:
                     product = self.env['product.product'].search(
                         [('barcode', '=', code)], limit=1)
@@ -319,7 +361,31 @@ class ProductCombinationOptionMapper(Component):
             limit=1,
         )
         if binding:
-            return {'odoo_id': binding.id}
+            already_binded = self.check_binding(record, binding.id)
+            if already_binded:
+                return {
+                    'name': already_binded['new_name']
+                }
+            else:
+                return {'odoo_id': binding.id}
+
+    def check_binding(self, record, odoo_id):
+        counter = 1
+        while odoo_id and self.model.search([
+            ('odoo_id', '=', odoo_id),
+            ('backend_id', '=', self.backend_record.id)
+        ]):
+            counter += 1
+            name = '{} {}'.format(self.name(record)['name'], counter)
+            odoo = self.model.odoo_id.search([
+                ('name', '=', name)
+            ], limit=1)
+            odoo_id = odoo and odoo.id or False
+
+        if counter == 1:
+            return False
+        else:
+            return {'new_name': name}
 
     @mapping
     def name(self, record):

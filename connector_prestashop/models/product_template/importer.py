@@ -124,7 +124,7 @@ class TemplateMapper(Component):
 #         if product:
 #             return {'odoo_id': product.id}
         if self.backend_record.matching_product_template:
-            if self.has_combinations(record):
+            if self.has_combinations(record) and not self.backend_record.no_varint_matching:
                 # Browse combinations for matching products and find if there
                 # is a potential template to be matched
                 template = self.env['product.template']
@@ -150,7 +150,7 @@ class TemplateMapper(Component):
                                 'combinations reference %s. Maybe consider to '
                                 'update you datas') % code)
                         template |= product.product_tmpl_id
-                    if self.backend_record.matching_product_ch == 'barcode':
+                    elif self.backend_record.matching_product_ch == 'barcode':
                         product = self.env['product.product'].search(
                             [('barcode', '=', code)])
                         if len(product) > 1:
@@ -162,14 +162,15 @@ class TemplateMapper(Component):
                 _logger.debug('template %s' % template)
                 if len(template) == 1:
                     return {'odoo_id': template.id}
-                if len(template) > 1:
+                elif len(template) > 1:
                     raise ValidationError(_(
                         'Error! Multiple templates are found with '
                         'combinations reference. Maybe consider to change '
                         'matching option'))
             else:
-                code = record.get(self.backend_record.matching_product_ch)
+                # code = record.get(self.backend_record.matching_product_ch)
                 if self.backend_record.matching_product_ch == 'reference':
+                    code = self.default_code(record)['default_code']
                     if code:
                         if self._template_code_exists(code):
                             product = self.env['product.template'].search(
@@ -178,6 +179,7 @@ class TemplateMapper(Component):
                                 return {'odoo_id': product.id}
 
                 if self.backend_record.matching_product_ch == 'barcode':
+                    code = self.barcode(record).get('barcode')
                     if code:
                         product = self.env['product.template'].search(
                             [('barcode', '=', code)], limit=1)
@@ -193,9 +195,10 @@ class TemplateMapper(Component):
         ], limit=1)
         return len(template_ids) > 0
 
+    @only_create
     @mapping
     def default_code(self, record):
-        if self.has_combinations(record):
+        if self.has_combinations(record) and not self.backend_record.no_varint_matching:
             return {}
         code = record.get('reference')
         if not code:
@@ -287,16 +290,46 @@ class TemplateMapper(Component):
     def company_id(self, record):
         return {'company_id': self.backend_record.company_id.id}
 
+    @only_create
     @mapping
     def barcode(self, record):
-        if self.has_combinations(record):
+        if self.has_combinations(record) and not self.backend_record.no_varint_matching:
             return {}
         barcode = record.get('barcode') or record.get('ean13')
         if barcode in ['', '0']:
             return {}
         if self.env['barcode.nomenclature'].check_ean(barcode):
-            return {'barcode': barcode}
-        return {}
+            default_code = self.default_code(record)['default_code']
+            if self._template_barcode_exists('barcode', barcode, default_code):
+                i = 2
+                current_code = '%s_%s' % (barcode, i)
+                while self._template_barcode_exists('barcode', current_code, default_code):
+                    i += 1
+                    current_code = '%s_%s' % (barcode, i)
+                return {'barcode': current_code}
+            else:
+                return {'barcode': barcode}
+        else:
+            return {}
+
+    def _template_barcode_exists(self, field, code, default_code=None):
+        product_model = self.env['product.product']
+        template_binder = self.binder_for('prestashop.product.template')
+        product_combination_binder = self.binder_for('prestashop.product.combination')
+
+        product_id = product_model.search([
+            (field, '=', code),
+            ('company_id', '=', self.backend_record.company_id.id),
+        ], limit=1)
+
+        if default_code:
+            return product_id and (not product_id.default_code == default_code or
+                                   (template_binder.to_external(product_id.product_tmpl_id, wrap=True) or
+                                    product_combination_binder.to_external(product_id, wrap=True)))
+        else:
+           return product_id and \
+                (template_binder.to_external(product_id.product_tmpl_id, wrap=True) or
+                 product_combination_binder.to_external(product_id, wrap=True))
 
     def _get_tax_ids(self, record):
         # if record['id_tax_rules_group'] == '0':
@@ -322,6 +355,7 @@ class TemplateMapper(Component):
         if record['type']['value'] and record['type']['value'] == 'virtual':
             return {"type": 'service'}
         return {"type": 'product'}
+
 # TODO FIXME
 #    @mapping
 #    def extras_features(self, record):

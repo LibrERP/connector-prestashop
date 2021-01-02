@@ -199,7 +199,7 @@
                                     <field name="matching_product_ch"
                                            attrs="{'invisible':[('matching_product_template', '=', False)],
                                                     'required':[('matching_product_template', '=', True)]}"/>
-
+                                    <field name="no_varint_matching"/>
                                 </group>
                                 <group string="Matching option for partner">
                                     <field name="matching_customer"></field>

@@ -150,6 +150,8 @@ class PrestashopBackend(models.Model):
         [('reference', 'Reference'), ('barcode', 'Barcode')],
         string="Matching Field for product")
 
+    no_varint_matching = fields.Boolean(string="Don't match product variants")
+
     matching_customer = fields.Boolean(
         string="Matching Customer",
         help="The selected fields will be matched to the ref field of the "
