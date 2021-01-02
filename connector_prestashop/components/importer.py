@@ -123,37 +123,6 @@ class PrestashopImporter(AbstractComponent):
         """Return the openerp id from the prestashop id"""
         return self.binder.to_internal(self.prestashop_id)
 
-    def _get_binding_from_data(self, record, unique_fields):
-        for field in unique_fields:
-            if field in record:
-                odoo = self.model.odoo_id.search([
-                    (field, '=', record[field])
-                ])
-                if odoo:
-                    # TODO: Investigate why this happens
-                    duplicated = self.model.search([
-                        ('odoo_id', '=', odoo.id)
-                    ])
-                    if duplicated:
-                        error_message = 'Duplicated {field}: {value}\n'.format(field=field, value=record[field])
-                        _logger.debug(error_message)
-                        # Create logs directory if it doesn't exists
-                        if not os.path.isdir('../logs/'):
-                            _logger.debug("Trying to create directory '{}'".format(os.getcwd()))
-                            os.mkdir('../logs/')
-                        with open('../logs/duplicated.txt', 'a') as f:
-                            f.write(error_message)
-                        return -1
-                    else:
-                        record['odoo_id'] = odoo.id
-                        binding = self.model.with_context(
-                            **self._create_context()
-                        ).create(record)
-                        _logger.debug(
-                            '%d created from odoo %s', binding, odoo.id)
-                        return binding
-        return False
-
     def no_overlap(self, record, field):
         value = record[field]
         counter = 1
@@ -352,15 +321,6 @@ class PrestashopImporter(AbstractComponent):
                 record = self._update_data(map_record)
             else:
                 record = self._create_data(map_record)
-
-                # Try to bind external products with products already in Odoo
-                # if self.work.model_name in ('prestashop.product.template', 'prestashop.product.product',
-                #                             'prestashop.product.combination') and not binding:
-                #     binding = self._get_binding_from_data(record, ('default_code', 'barcode'))
-                #     if binding == -1:
-                #         # Odoo product is already binded to another product
-                #         # Should never happen
-                #         return
 
         # special check on data before import
         self._validate_data(record)

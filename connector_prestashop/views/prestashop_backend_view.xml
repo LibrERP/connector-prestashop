@@ -151,7 +151,7 @@
                                     <field name="import_refunds_since" class="oe_inline"
                                            nolabel="1"/>
                                 </div>
-                                <button name="import_refunds" type="object" class="oe_highlight"
+                                <button name="import_refunds" type="object" class="oe_highlight" disabled="True"
                                         string="Import in background"/>
                             </group>
                             <group>
@@ -166,12 +166,12 @@
                             <group>
                                 <label for="update_product_stock_qty" string="Export stock quantities"
                                        class="oe_inline"/>
-                                <button name="update_product_stock_qty" type="object"
+                                <button name="update_product_stock_qty" type="object" disabled="True"
                                         class="oe_highlight" string="Export in background"/>
                             </group>
                             <group>
                                 <label for="import_stock_qty" string="Import stock quantities" class="oe_inline"/>
-                                <button name="import_stock_qty" type="object" class="oe_highlight"
+                                <button name="import_stock_qty" type="object" class="oe_highlight" disabled="True"
                                         string="Import in background"/>
                             </group>
 <!--                            <group>-->
