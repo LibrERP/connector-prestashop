@@ -168,6 +168,7 @@ Contributors
 * Florent THOMAS <florent.thomas@mind-and-go.com>
 * Francisco Fernández <ffernandez@planetatic.com>
 * Michele Trevisan <michele.trevisan@didotech.com>
+* Andrei Levin <andrei.levin@didotech.com>
 
 Maintainer
 ----------
