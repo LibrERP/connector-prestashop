@@ -16,7 +16,7 @@
                         <field name="account_position_private_non_eu_id" />
                         <field name="account_position_business_non_eu_id" />
                     </group>
-                    <group> string="Sale Order Types">
+                    <group string="Sale Order Types">
                         <field name="sale_order_type_private_id" />
                         <field name="sale_order_type_business_id" />
                         <field name="sale_order_type_private_eu_id" />
