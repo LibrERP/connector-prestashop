@@ -85,7 +85,7 @@ class EuPartnerImportMapper(PartnerImportMapper):
             property_account_receivable_id = self.backend_record.account_receivable_business_id.id
         else:
             property_account_receivable_id = self.backend_record.account_receivable_private_id.id
-            if country 
+            if country:
                 if country.code.upper() == self.env.user.company_id.partner_id.country_id.code.upper():
                     sale_type_id = self.backend_record.sale_order_type_private_id.id
                 elif (country.code.upper() in EUROPEAN_UNION):
