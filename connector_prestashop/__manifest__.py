@@ -3,12 +3,12 @@
 # Copyright 2011-2013 Akretion
 # Copyright 2015 AvanzOSC
 # Copyright 2015-2016 Tecnativa
-# Copyright 2020 Didotech
+# Copyright 2020-2021 Didotech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
     "name": "PrestaShop-Odoo connector",
-    "version": "12.0.6.13.10",
+    "version": "12.0.6.13.11",
     "license": "AGPL-3",
     "depends": [
         "account",
