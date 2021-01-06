@@ -73,7 +73,7 @@ class EuPartnerImportMapper(PartnerImportMapper):
         sale_type_id = self.backend_record.sale_order_type_private_id.id
         account_position_id = self.backend_record.account_position_private_id.id
         preferred_pick_location_id = self.backend_record.stock_location_id.id
-        
+
         if vat:
             if vat[0].upper() == self.env.user.company_id.partner_id.country_id.code.upper():
                 account_position_id = self.backend_record.account_position_business_id.id
