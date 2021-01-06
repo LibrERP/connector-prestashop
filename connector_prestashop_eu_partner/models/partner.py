@@ -89,7 +89,7 @@ class EuPartnerImportMapper(PartnerImportMapper):
             if country and (country.code.upper() not in EUROPEAN_UNION) or not country :
                 sale_type = 'Vendite ITA'
 
-        sale_type_id = self.env['res.partner'].search({'name','=', sale_type})
+        sale_type_id = self.env['sale.order.type'].search([('name','=', sale_type)])
         if country and country.code.upper() == self.env.user.company_id.partner_id.country_id.code.upper() or not country:
             property_account_payable_id = self.backend_record.account_payable_national_id.id
         else:
