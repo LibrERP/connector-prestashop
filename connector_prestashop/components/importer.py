@@ -156,7 +156,7 @@ class PrestashopImporter(AbstractComponent):
         return map_record.values()
 
     def _create(self, data):
-        """ Create the OpenERP record """
+        """ Create the Odoo record """
         # special check on data before import
         self._validate_data(data)
         binding = self.model.with_context(
@@ -330,6 +330,18 @@ class PrestashopImporter(AbstractComponent):
         else:
             if self.work.model_name == 'prestashop.product.combination.option':
                 record = self.no_overlap(record, 'name')
+            elif self.work.model_name in ('prestashop.product.combination',
+                                        'prestashop.product.template'):
+                if 'odoo_id' in record:
+                    # Create binding
+                    # record = {
+                    #     'odoo_id': record['odoo_id'],
+                    #     'backend_id': record['backend_id'],
+                    #     'main_template_id': record['main_template_id']
+                    # }
+                    odoo_id = record['odoo_id']
+                    record = self._update_data(map_record)
+                    record['odoo_id'] = odoo_id
 
             binding = self._create(record)
 

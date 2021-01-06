@@ -175,6 +175,7 @@ class SaleOrderImportMapper(Component):
         (_get_sale_order_lines,
          'prestashop_order_line_ids', 'prestashop.sale.order.line'),
         # TODO: compatibility issues with PS 1.7.x
+        # Requires patch in Prestashop to enable access to order_discounts
         # (_get_discounts_lines,
         #  'prestashop_discount_line_ids', 'prestashop.sale.order.line.discount')
     ]
@@ -362,11 +363,11 @@ class SaleOrderImporter(Component):
             )
         binding.odoo_id.recompute()
 
-    def _create(self, data):
-        binding = super(SaleOrderImporter, self)._create(data)
-        if binding.fiscal_position_id:
-            binding.odoo_id._compute_tax_id()
-        return binding
+    # def _create(self, data):
+    #     binding = super(SaleOrderImporter, self)._create(data)
+    #     if binding.fiscal_position_id:
+    #         binding.odoo_id._compute_tax_id()
+    #     return binding
 
     def _after_import(self, binding):
         super(SaleOrderImporter, self)._after_import(binding)

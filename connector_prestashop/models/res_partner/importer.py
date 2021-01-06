@@ -212,7 +212,10 @@ class AddressImporter(Component):
                 country_code = binding.country_id.code or self.env.user.company_id.partner_id.country_id.code
                 vat_number = country_code + vat_number
             if self._check_vat(vat_number):
-                binding.parent_id.write({'vat': vat_number,'is_company': True})
+                binding.parent_id.write({
+                    'vat': vat_number,
+                    'is_company': True
+                })
             else:
                 msg = _('Please, check the VAT number: %s') % vat_number
                 self.backend_record.add_checkpoint(

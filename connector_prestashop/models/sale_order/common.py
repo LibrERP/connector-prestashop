@@ -236,7 +236,8 @@ class OrderDiscountAdapter(Component):
     _name = 'prestashop.sale.order.line.discount.adapter'
     _inherit = 'prestashop.adapter'
     _apply_on = 'prestashop.sale.order.line.discount'
-    _prestashop_model = 'order_cart_rule'
+    # _prestashop_model = 'order_cart_rule'  # 1.7.6.5 requires patch
+    _prestashop_model = 'order_discounts'  # 1.7.7 requires patch
 
 
 class PrestashopSaleOrderListener(Component):
