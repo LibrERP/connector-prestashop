@@ -3,10 +3,11 @@
 
 {
     'name': 'Prestashop Connector EU partner',
-    'version': '12.0.1.0.0',
+    'version': '12.0.1.1.0',
     'category': 'Connector',
     'depends': [
         'connector_prestashop',
+        'sale_order_type',          # OCA sale-workflow
     ],
     'author': 'Didotech srl',
     'license': 'AGPL-3',

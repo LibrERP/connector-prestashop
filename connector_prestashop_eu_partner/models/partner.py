@@ -56,6 +56,7 @@ class EuPartnerImportMapper(PartnerImportMapper):
     @mapping
     def property_account_position_id(self, record):
         country = False
+        sale_type = 'Vendite Kalamitica.com'
         adapter = self.component(usage='backend.adapter')
         address_ids = adapter.client.search('addresses', {'filter[id_customer]': record['id']})
         for address_id in address_ids:
@@ -73,15 +74,22 @@ class EuPartnerImportMapper(PartnerImportMapper):
         if vat:
             if vat[0].upper() == self.env.user.company_id.partner_id.country_id.code.upper():
                 account_position_id = self.backend_record.account_position_business_id.id
+                sale_type = 'Vendite ITA'
             elif vat[0].upper() in EUROPEAN_UNION:
                 account_position_id = self.backend_record.account_position_business_eu_id.id
+                sale_type = 'Vendite CEE'
             else:
                 account_position_id = self.backend_record.account_position_business_non_eu_id
+                sale_type = 'Vendite ITA'
             property_account_receivable_id = self.backend_record.account_receivable_business_id.id
         else:
+            sale_type = 'Vendite Kalamitica.com'
             account_position_id = self.backend_record.account_position_private_id.id
             property_account_receivable_id = self.backend_record.account_receivable_private_id.id
+            if country and (country.code.upper() not in EUROPEAN_UNION) or not country :
+                sale_type = 'Vendite ITA'
 
+        sale_type_id = self.env['res.partner'].search({'name','=', sale_type})
         if country and country.code.upper() == self.env.user.company_id.partner_id.country_id.code.upper() or not country:
             property_account_payable_id = self.backend_record.account_payable_national_id.id
         else:
@@ -90,5 +98,6 @@ class EuPartnerImportMapper(PartnerImportMapper):
         return {
             'property_account_position_id': account_position_id,
             'property_account_receivable_id': property_account_receivable_id,
-            'property_account_payable_id': property_account_payable_id
+            'property_account_payable_id': property_account_payable_id,
+            'sale_type': sale_type_id.id,
         }
