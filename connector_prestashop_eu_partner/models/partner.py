@@ -107,5 +107,5 @@ class EuPartnerImportMapper(PartnerImportMapper):
             'property_account_receivable_id': property_account_receivable_id,
             'property_account_payable_id': property_account_payable_id,
             'sale_type': sale_type_id,
-            'preferred_pick_location_id', preferred_pick_location_id,
+            'preferred_pick_location_id': preferred_pick_location_id,
         }
