@@ -69,7 +69,7 @@ class EuPartnerImportMapper(PartnerImportMapper):
                     break
         else:
             vat = False
-        
+
         sale_type_id = self.backend_record.sale_order_type_private_id.id
         account_position_id = self.backend_record.account_position_private_id.id
         if vat:

@@ -86,7 +86,7 @@ class PartnerImportMapper(Component):
         # This is sad because we _have_ to have a company partner if we want to
         # store multiple adresses... but... well... we have customers who want
         # to be billed at home and be delivered at work... (...)...
-        return {'is_company': True}
+        return {'is_company': False}
 
     @mapping
     def company_id(self, record):
@@ -212,7 +212,7 @@ class AddressImporter(Component):
                 country_code = binding.country_id.code or self.env.user.company_id.partner_id.country_id.code
                 vat_number = country_code + vat_number
             if self._check_vat(vat_number):
-                binding.parent_id.write({'vat': vat_number})
+                binding.parent_id.write({'vat': vat_number,'is_company': True})
             else:
                 msg = _('Please, check the VAT number: %s') % vat_number
                 self.backend_record.add_checkpoint(
