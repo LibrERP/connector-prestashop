@@ -207,10 +207,10 @@ class AddressImporter(Component):
             vat_number = record['dni'].replace('.', '').replace(
                 ' ', '').replace('-', '')
         if vat_number:
-            # TODO: move to custom module
             regexp = re.compile('^[a-zA-Z]{2}')
             if not regexp.match(vat_number):
-                vat_number = 'IT' + vat_number
+                country_code = binding.country_id.code or self.env.user.company_id.partner_id.country_id.code
+                vat_number = country_code + vat_number
             if self._check_vat(vat_number):
                 binding.parent_id.write({'vat': vat_number})
             else:
