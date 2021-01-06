@@ -210,7 +210,7 @@ class AddressImporter(Component):
             # TODO: move to custom module
             regexp = re.compile('^[a-zA-Z]{2}')
             if not regexp.match(vat_number):
-                vat_number = 'ES' + vat_number
+                vat_number = 'IT' + vat_number
             if self._check_vat(vat_number):
                 binding.parent_id.write({'vat': vat_number})
             else:

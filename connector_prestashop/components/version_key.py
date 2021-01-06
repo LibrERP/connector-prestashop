@@ -87,7 +87,7 @@ class VersionKey1765(Component):
         'tax': 'tax',
         'combinations': 'combination',
         'product_features': 'product_feature',
-        'tag': 'tag',
+        'tag': 'tags',
         'messages': 'customer_messages',
         'manufacturers': 'manufacturers',
     }
