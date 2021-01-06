@@ -3,7 +3,7 @@
 
 {
     'name': 'Prestashop Connector EU partner',
-    'version': '12.0.1.2.0',
+    'version': '12.0.1.2.1',
     'category': 'Connector',
     'depends': [
         'connector_prestashop',
