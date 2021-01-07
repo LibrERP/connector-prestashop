@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_prestashop_italy_backend_form" model="ir.ui.view">
+        <field name="name">prestashop.backend.italy.form</field>
+        <field name="model">prestashop.backend</field>
+        <field name="inherit_id" ref="connector_prestashop.view_prestashop_backend_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='options']" position="inside">
+                <group colspan="4">
+                    <group string="E-Invoice">
+                        <field name="partner_e_invoice_detail_level" />
+                    </group>
+                    <group>
+                    </group>
+                </group>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
