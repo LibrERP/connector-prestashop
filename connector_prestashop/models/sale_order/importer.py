@@ -176,8 +176,8 @@ class SaleOrderImportMapper(Component):
          'prestashop_order_line_ids', 'prestashop.sale.order.line'),
         # TODO: compatibility issues with PS 1.7.x
         # Requires patch in Prestashop to enable access to order_discounts
-        # (_get_discounts_lines,
-        #  'prestashop_discount_line_ids', 'prestashop.sale.order.line.discount')
+        (_get_discounts_lines,
+         'prestashop_discount_line_ids', 'prestashop.sale.order.line.discount')
     ]
 
     def _map_child(self, map_record, from_attr, to_attr, model_name):
