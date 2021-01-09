@@ -133,7 +133,7 @@ class PrestashopProductTemplate(models.Model):
         for product in self:
             backends[product.backend_id].add(product.id)
 
-        for backend, product_ids in backends['prestashop.backend']:
+        for backend, product_ids in backends.items():
             products = self.browse(product_ids)
             products._recompute_prestashop_qty_backend(backend)
         return True
@@ -190,7 +190,7 @@ class PrestashopProductTemplate(models.Model):
             exporter = work.component(usage='inventory.exporter')
             return exporter.run(self, fields)
 
-    @job(default_channel='root.prestashop')
+    # @job(default_channel='root.prestashop')
     def export_product_quantities(self, backend=None):
         self.search([('backend_id', '=', backend.id)]
                     ).recompute_prestashop_qty()
@@ -236,7 +236,7 @@ class ProductInventoryAdapter(Component):
         response = client.search(self._prestashop_model, filters)
         for stock_id in response:
             res = client.get(self._prestashop_model, stock_id)
-            first_key = res.keys()[0]
+            first_key = list(res.keys())[0]
             stock = res[first_key]
             stock['quantity'] = int(quantity['quantity'])
             stock['out_of_stock'] = int(quantity['out_of_stock'])
