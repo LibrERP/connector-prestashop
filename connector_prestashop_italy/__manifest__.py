@@ -3,7 +3,7 @@
 
 {
     'name': 'Prestashop Connector Italian localization',
-    'version': '12.0.0.2.0',
+    'version': '12.0.0.2.1',
     'category': 'Connector',
     'depends': [
         'connector_prestashop',
@@ -13,7 +13,8 @@
     'license': 'AGPL-3',
 
     'data': [
-        'views/backend_view.xml'
+        'views/backend_view.xml',
+        'data/scheduled_action.xml',
     ],
 
     'installable': True

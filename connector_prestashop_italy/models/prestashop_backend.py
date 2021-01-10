@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import fields, models
+from odoo import fields, models, api
 import vatnumber
 import logging
 
@@ -74,3 +74,8 @@ class PrestashopBackend(models.Model):
     #                 counter += 1
     #                 _logger.debug('{}: {}: "{}"'.format(counter, partner.name, partner.vat))
     #                 # partner.vat = False
+
+    @api.model
+    def check_sale_orders(self, domain=None):
+        self.search(domain or []).import_customers_since()
+        self.search(domain or []).import_sale_orders()
