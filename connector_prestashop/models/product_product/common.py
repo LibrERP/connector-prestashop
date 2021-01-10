@@ -163,7 +163,7 @@ class PrestashopProductCombination(models.Model):
         for product in self:
             backends[product.backend_id].add(product.id)
 
-        for backend, product_ids in backends['prestashop.backend']:
+        for backend, product_ids in backends.items():
             products = self.browse(product_ids)
             products._recompute_prestashop_qty_backend(backend)
         return True
@@ -191,7 +191,7 @@ class PrestashopProductCombination(models.Model):
             return exporter.run(self, fields)
 
     @api.model
-    @job(default_channel='root.prestashop')
+    # @job(default_channel='root.prestashop')
     def export_product_quantities(self, backend):
         self.search([
             ('backend_id', '=', backend.id),

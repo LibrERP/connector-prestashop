@@ -18,6 +18,13 @@ class SaleOrder(models.Model):
         inverse_name='odoo_id',
         string='PrestaShop Bindings',
     )
+    tolerance = fields.Float(compute="get_tolerance", string="Tolerance")
+    tax_tolerance = fields.Float(compute="get_tolerance", string="Tax Tolerance")
+
+    def get_tolerance(self):
+        for order in self:
+            order.tolerance = order.prestashop_bind_ids[0].backend_id.tolerance  # default: 0.001
+            order.tax_tolerance = order.prestashop_bind_ids[0].backend_id.tax_tolerance  # default: 0.02
 
 
 class PrestashopSaleOrder(models.Model):

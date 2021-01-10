@@ -61,6 +61,8 @@
                             <field name="importable_order_state_ids" widget="many2many_tags"/>
                             <field name="discount_product_id"/>
                             <field name="discount_taxes_included"/>
+                            <field name="tolerance" />
+                            <field name="tax_tolerance" />
                         </group>
                         <group string="Stock">
                             <field name="warehouse_id"/>
@@ -166,7 +168,7 @@
                             <group>
                                 <label for="update_product_stock_qty" string="Export stock quantities"
                                        class="oe_inline"/>
-                                <button name="update_product_stock_qty" type="object" disabled="True"
+                                <button name="update_product_stock_qty" type="object"
                                         class="oe_highlight" string="Export in background"/>
                             </group>
                             <group>

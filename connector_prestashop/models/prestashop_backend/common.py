@@ -9,7 +9,7 @@ from odoo import models, fields, api, exceptions, _
 from ...components.backend_adapter import api_handle_errors
 from odoo.addons.connector.models.checkpoint import add_checkpoint
 from odoo.addons.base.models.res_partner import _tz_get
-import datetime
+from odoo.addons import decimal_precision as dp
 
 _logger = logging.getLogger(__name__)
 
@@ -174,6 +174,15 @@ class PrestashopBackend(models.Model):
         _tz_get, 'Timezone', size=64,
         help="The timezone of the backend. Used to synchronize the sale order "
              "date.")
+
+    tolerance = fields.Float(
+        string="Tolerance", default=0.001, digits=dp.get_precision('Product Price'),
+        help="default: 0.001"
+    )
+    tax_tolerance = fields.Float(
+        string="Tax Tolerance", default=0.02, digits=dp.get_precision('Product Price'),
+        help="default: 0.02"
+    )
 
     @api.onchange("matching_customer")
     def change_matching_customer(self):
