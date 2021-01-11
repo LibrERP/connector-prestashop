@@ -79,3 +79,7 @@ class PrestashopBackend(models.Model):
     def check_sale_orders(self, domain=None):
         self.search(domain or []).import_customers_since()
         self.search(domain or []).import_sale_orders()
+
+    @api.model
+    def update_stock_qty(self, domain=None):
+        self.search(domain or []).update_product_stock_qty()
