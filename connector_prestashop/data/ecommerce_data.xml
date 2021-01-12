@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
 
+    <!--    Find the configuration in the menu Sales > Configuration > Sales > Exception Rules -->
     <record id="excep_order_wrong_total_amount" model="exception.rule">
         <field name="name">Total Amount differs from PrestaShop</field>
         <field name="description">The amount computed in Odoo doesn't match with the amount in PrestaShop.
