@@ -1,13 +1,12 @@
-bs4
+beautifulsoup4
 freezegun
 html2text
 mock
-openerp
-prestapyt
+prestapyt >= 0.9.1
 psycopg2
 pytz
 requests
 setuptools
 slugify
 vatnumber
-vcr
+vcrpy==4.1.1
