@@ -1,7 +1,13 @@
-html2text
-prestapyt >= 0.9.1
-Unidecode
-beautifulsoup4
-# tests dependencies
+bs4
 freezegun
-vcrpy==4.1.1
+html2text
+mock
+openerp
+prestapyt
+psycopg2
+pytz
+requests
+setuptools
+slugify
+vatnumber
+vcr
