@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="ir_cron_import_PS_sale_orders" model="ir.cron">
-        <field name="name">PrestaShop - Import Sale Orders</field>
-        <field name="interval_number">1</field>
-        <field name="interval_type">hours</field>
-        <field name="numbercall">-1</field>
-        <field name="doall" eval="False"/>
-        <field name="model_id" ref="model_prestashop_backend"/>
-        <field name="code">model.check_sale_orders()</field>
-        <field name="state">code</field>
-    </record>
-
-    <record id="ir_cron_update_PS_stock_qty" model="ir.cron">
-        <field name="name">PrestaShop - Update Stock Quantity</field>
-        <field name="interval_number">1</field>
-        <field name="interval_type">hours</field>
-        <field name="numbercall">-1</field>
-        <field name="doall" eval="False"/>
-        <field name="active" eval="False"/>
-        <field name="model_id" ref="model_prestashop_backend"/>
-        <field name="code">model.update_stock_qty()</field>
-        <field name="state">code</field>
-    </record>
+    <data noupdate="1">
+        <record id="ir_cron_import_PS_sale_orders" model="ir.cron">
+            <field name="name">PrestaShop - Import Sale Orders</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="active" eval="False"/>
+            <field name="model_id" ref="model_prestashop_backend"/>
+            <field name="code">model.check_sale_orders()</field>
+            <field name="state">code</field>
+        </record>
+    
+        <record id="ir_cron_update_PS_stock_qty" model="ir.cron">
+            <field name="name">PrestaShop - Update Stock Quantity</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="active" eval="False"/>
+            <field name="model_id" ref="model_prestashop_backend"/>
+            <field name="code">model.update_stock_qty()</field>
+            <field name="state">code</field>
+        </record>
+    </data>
 </odoo>
