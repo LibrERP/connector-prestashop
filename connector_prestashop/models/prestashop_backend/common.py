@@ -284,6 +284,14 @@ class PrestashopBackend(models.Model):
         self.write({'state': 'checked'})
 
     @api.multi
+    def import_states(self):
+        for backend_record in self:
+            self.env['prestashop.res.country.state'].import_batch(
+                backend_record
+            )
+        return True
+
+    @api.multi
     def import_customers_since(self):
         for backend_record in self:
             since_date = backend_record.import_partners_since

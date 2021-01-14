@@ -23,6 +23,7 @@ from . import product_template
 from . import product_product
 from . import product_supplierinfo
 from . import res_country
+from . import res_country_state
 from . import res_currency
 from . import queue_job
 from . import mail_message
