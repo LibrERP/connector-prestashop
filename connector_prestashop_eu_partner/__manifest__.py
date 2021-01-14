@@ -16,5 +16,5 @@
         'views/backend_view.xml'
     ],
 
-    'installable': True
+    'installable': False
 }
