@@ -472,9 +472,8 @@ class SaleOrderLineMapper(Component):
                 'product_uom': product and product.uom_id.id,
             }
         else:
-            # Product was deleted from Prestashop but it is still in Sale Order
+            # Product was deleted or modified in Prestashop
             # TODO: It will be better to use some generic product and not Note line
-            # Anyway we are talking about old orders, not a big deal
             return {'display_type': 'line_note'}
 
     def _find_tax(self, ps_tax_id):

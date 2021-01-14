@@ -26,6 +26,7 @@ class PrestashopModelBinder(Component):
         'prestashop.res.partner.category',
         'prestashop.res.lang',
         'prestashop.res.country',
+        'prestashop.res.country.state',
         'prestashop.res.currency',
         'prestashop.account.tax',
         'prestashop.account.tax.group',

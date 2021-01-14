@@ -148,6 +148,12 @@ class AddressImportMapper(Component):
         return {'backend_id': self.backend_record.id}
 
     @mapping
+    def state_id(self, record):
+        binder = self.binder_for('prestashop.res.country.state')
+        state = binder.to_internal(record['id_state'], unwrap=True)
+        return {'state_id': state.id}
+
+    @mapping
     def parent_id(self, record):
         binder = self.binder_for('prestashop.res.partner')
         parent = binder.to_internal(record['id_customer'], unwrap=True)

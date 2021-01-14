@@ -18,7 +18,7 @@ class SaleOrder(models.Model):
         inverse_name='odoo_id',
         string='PrestaShop Bindings',
     )
-    tolerance = fields.Float(compute="get_tolerance", string="Tolerance")
+    tolerance = fields.Float(compute="get_tolerance", string="Amount Tolerance")
     tax_tolerance = fields.Float(compute="get_tolerance", string="Tax Tolerance")
 
     def get_tolerance(self):

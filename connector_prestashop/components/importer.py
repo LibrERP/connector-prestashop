@@ -330,18 +330,23 @@ class PrestashopImporter(AbstractComponent):
         else:
             if self.work.model_name == 'prestashop.product.combination.option':
                 record = self.no_overlap(record, 'name')
-            elif self.work.model_name in ('prestashop.product.combination',
-                                        'prestashop.product.template'):
+            elif self.work.model_name in (
+                'prestashop.product.combination',
+                'prestashop.product.template',
+                'prestashop.res.country.state'
+            ):
                 if 'odoo_id' in record:
                     # Create binding
-                    # record = {
-                    #     'odoo_id': record['odoo_id'],
-                    #     'backend_id': record['backend_id'],
-                    #     'main_template_id': record['main_template_id']
-                    # }
+                    if self.env['prestashop.res.country.state'].search([('odoo_id', '=', record['odoo_id'])]):
+                        # Prestashop duplicated record
+                        return
+
                     odoo_id = record['odoo_id']
                     record = self._update_data(map_record)
                     record['odoo_id'] = odoo_id
+                elif self.work.model_name == 'prestashop.res.country.state':
+                    if not record.get('active'):
+                        return
 
             binding = self._create(record)
 
@@ -447,7 +452,7 @@ class DelayedBatchImporter00(AbstractComponent):
             description=description,
             channel=channel,
             identity_key=identity_key
-            ).import_record(
+        ).import_record(
             backend=self.backend_record,
             prestashop_id=external_id,
             **kwargs)

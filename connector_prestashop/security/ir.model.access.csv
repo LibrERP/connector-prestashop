@@ -4,6 +4,7 @@ access_prestashop_res_lang_full,Full access on prestashop.res.lang,model_prestas
 access_prestashop_binding_full,Full access on prestashop.binding,model_prestashop_binding,connector.group_connector_manager,1,1,1,1
 access_prestashop_shop_group_full,Full access on prestashop.shop.group,model_prestashop_shop_group,connector.group_connector_manager,1,1,1,1
 access_prestashop_res_country_full,Full access on prestashop.res.country,model_prestashop_res_country,connector.group_connector_manager,1,1,1,1
+access_prestashop_res_country_state_full,Full access on prestashop.res.country.state,model_prestashop_res_country_state,connector.group_connector_manager,1,1,1,1
 access_prestashop_res_currency_full,Full access on prestashop.res.currency,model_prestashop_res_currency,connector.group_connector_manager,1,1,1,1
 access_prestashop_shop_full,Full access on prestashop.shop,model_prestashop_shop,connector.group_connector_manager,1,1,1,1
 access_prestashop_prestashop_res_partner_user,User access on prestashop.res.partner,model_prestashop_res_partner,base.group_user,1,0,0,0
