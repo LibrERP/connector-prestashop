@@ -228,6 +228,8 @@ class AddressImporter(Component):
                     binding.parent_id,
                     message=msg,
                 )
+        if record['company']:
+            binding.parent_id.write({'name': record['company']})
 
 
 class AddressBatchImporter(Component):
