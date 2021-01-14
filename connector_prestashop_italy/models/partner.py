@@ -5,7 +5,7 @@ from odoo.addons.connector.components.mapper import (
     mapping,
     only_create,
 )
-from odoo.addons.connector_prestashop.models.res_partner.importer import PartnerImportMapper
+from odoo.addons.connector_prestashop.models.res_partner.importer import PartnerImportMapper, AddressImporter
 import re
 
 EUROPEAN_UNION = {
@@ -116,3 +116,24 @@ class ItalyPartnerImportMapper(PartnerImportMapper):
         return {
             'e_invoice_detail_level': self.backend_record.partner_e_invoice_detail_level
         }
+
+
+class ItalianAddressImporter(AddressImporter):
+
+    def _after_import(self, binding):
+        super()._after_import(binding)
+        if self.prestashop_record['sdi_pec'] and binding.parent_id.vat:
+            values = {
+                'electronic_invoice_subjected': True,
+                'electronic_invoice_obliged_subject': True
+            }
+            if '@' in self.prestashop_record['sdi_pec']:
+                values['pec_destinatario'] = self.prestashop_record['sdi_pec']
+            else:
+                values['codice_destinatario'] = self.prestashop_record['sdi_pec']
+
+            binding.parent_id.write(values)
+        elif self.prestashop_record['sdi_pec']:
+            binding.parent_id.write({
+                'comment': 'SDI/PEC: {}'.format(self.prestashop_record['sdi_pec'])
+            })
