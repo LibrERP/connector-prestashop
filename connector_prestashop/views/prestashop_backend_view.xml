@@ -103,7 +103,7 @@
                                 <div>
                                     <label for="import_states" string="Import states/provinces" class="oe_inline"/>
                                 </div>
-                                <button name="import_states" type="object" class="oe_highlight" disabled="True"
+                                <button name="import_states" type="object" class="oe_highlight"
                                         string="Start import"/>
                             </group>
                             <group>

@@ -81,6 +81,7 @@ class PartnerImportMapper(Component):
     def customer(self, record):
         return {'customer': True}
 
+    @only_create
     @mapping
     def is_company(self, record):
         # This is sad because we _have_ to have a company partner if we want to
