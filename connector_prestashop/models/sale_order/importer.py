@@ -248,7 +248,20 @@ class SaleOrderImportMapper(Component):
 
     @mapping
     def pricelist_id(self, record):
-        return {'pricelist_id': self.backend_record.pricelist_id.id}
+        binder = self.binder_for('prestashop.res.currency')
+        currency = binder.to_internal(record['id_currency'], unwrap=True)
+        if not currency.id == self.backend_record.pricelist_id.currency_id.id:
+            pricelists = self.env['product.pricelist'].search([
+                ('currency_id', '=', currency.id)
+            ], order='sequence')
+            if pricelists:
+                pricelist = pricelists[0]
+            else:
+                pricelist = self.backend_record.pricelist_id
+        else:
+            pricelist = self.backend_record.pricelist_id
+
+        return {'pricelist_id': pricelist.id}
 
     @mapping
     def sale_team(self, record):
@@ -494,9 +507,6 @@ class SaleOrderLineMapper(Component):
     @mapping
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
-
-    # @mapping
-    # def display_type(selfself, record):
 
 
 class SaleOrderLineDiscountMapper(Component):
