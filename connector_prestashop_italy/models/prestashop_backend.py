@@ -62,6 +62,13 @@ class PrestashopBackend(models.Model):
         default='2', required=True
     )
 
+    tax_extra_eu = fields.Many2one(
+        comodel_name="account.tax",
+        string="Default extra EU tax",
+        required=False,
+        help="This tax will be used for all orders outside EU"
+    )
+
     # def button_verify_vat(self):
     #     counter = 0
     #     partner_model = self.env['res.partner']

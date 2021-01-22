@@ -6,6 +6,9 @@
         <field name="model">prestashop.backend</field>
         <field name="inherit_id" ref="connector_prestashop.view_prestashop_backend_form" />
         <field name="arch" type="xml">
+            <field name="tax_tolerance" position="after">
+                <field name="tax_extra_eu" />
+            </field>
             <xpath expr="//page[@name='options']" position="inside">
                 <group colspan="4">
                     <group string="Account positions for Customer">
