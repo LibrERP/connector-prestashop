@@ -184,6 +184,14 @@ class PrestashopBackend(models.Model):
         help="default: 0.02"
     )
 
+    # May be one day we will support Multy-Currencies payments
+    # currency_ids = new_field_ids = fields.One2many(
+    #     comodel_name="prestashop.res.currency",
+    #     inverse_name="Backend",
+    #     string="Currencies"
+    # )
+
+
     @api.onchange("matching_customer")
     def change_matching_customer(self):
         # Update the field list so that if you API change you could find the
@@ -196,8 +204,7 @@ class PrestashopBackend(models.Model):
         self.ensure_one()
 
         # options = {'limit': 1, 'display': 'full'}
-        # TODO : Unse new adapter pattern to get a simple partner json
-
+        # TODO : Use new adapter pattern to get a simple partner json
     #         prestashop = PrestaShopLocation(
     #                         self.location.encode(),
     #                         self.webservice_key,

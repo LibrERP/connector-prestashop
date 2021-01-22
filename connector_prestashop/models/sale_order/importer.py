@@ -246,22 +246,27 @@ class SaleOrderImportMapper(Component):
         else:
             return {'partner_shipping_id': self.partner_id(record)['partner_id']}
 
+    # Multi-currency
+    # @mapping
+    # def pricelist_id(self, record):
+    #     binder = self.binder_for('prestashop.res.currency')
+    #     currency = binder.to_internal(record['id_currency'], unwrap=True)
+    #     if not currency.id == self.backend_record.pricelist_id.currency_id.id:
+    #         pricelists = self.env['product.pricelist'].search([
+    #             ('currency_id', '=', currency.id)
+    #         ], order='sequence')
+    #         if pricelists:
+    #             pricelist = pricelists[0]
+    #         else:
+    #             pricelist = self.backend_record.pricelist_id
+    #     else:
+    #         pricelist = self.backend_record.pricelist_id
+    #
+    #     return {'pricelist_id': pricelist.id}
+
     @mapping
     def pricelist_id(self, record):
-        binder = self.binder_for('prestashop.res.currency')
-        currency = binder.to_internal(record['id_currency'], unwrap=True)
-        if not currency.id == self.backend_record.pricelist_id.currency_id.id:
-            pricelists = self.env['product.pricelist'].search([
-                ('currency_id', '=', currency.id)
-            ], order='sequence')
-            if pricelists:
-                pricelist = pricelists[0]
-            else:
-                pricelist = self.backend_record.pricelist_id
-        else:
-            pricelist = self.backend_record.pricelist_id
-
-        return {'pricelist_id': pricelist.id}
+        return {'pricelist_id': self.backend_record.pricelist_id.id}
 
     @mapping
     def sale_team(self, record):

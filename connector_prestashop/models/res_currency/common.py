@@ -18,6 +18,14 @@ class PrestashopResCurrency(models.Model):
         ondelete='cascade',
         oldname='openerp_id',
     )
+    # May be one day we will support Multy-Currencies payments
+    # pricelist_id = fields.Many2one(
+    #     'product.pricelist',
+    #     string='Default Pricelist',
+    #     required=False,
+    #     readonly=False,
+    #     help="Pricelist for current currency."
+    # )
 
 
 class ResCurrency(models.Model):
