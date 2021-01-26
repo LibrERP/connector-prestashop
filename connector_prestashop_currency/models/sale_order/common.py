@@ -46,13 +46,3 @@ class PrestashopSaleOrder(models.Model):
                     )
 
         return super().create(data)
-
-
-# class SaleOrderLine(models.Model):
-#     _inherit = 'sale.order.line'
-#
-#     def create(self, data):
-#         return super().create(data)
-#
-#     def write(self, data):
-#         return super().write(data)

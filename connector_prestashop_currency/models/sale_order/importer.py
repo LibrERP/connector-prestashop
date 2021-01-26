@@ -9,6 +9,8 @@ from odoo.addons.connector_prestashop.models.sale_order.importer import SaleOrde
 
 
 class CurrencySaleOrderImportMapper(SaleOrderImportMapper):
+    _inherit = 'prestashop.sale.order.mapper'
+    _apply_on = 'prestashop.sale.order'
 
     @mapping
     def order_currency_id(self, record):
