@@ -82,7 +82,7 @@ class ItalyPartnerImportMapper(PartnerImportMapper):
                 account_position_id = self.backend_record.account_position_business_eu_id.id
                 sale_type_id = self.backend_record.sale_order_type_business_eu_id.id
             else:
-                account_position_id = self.backend_record.account_position_business_non_eu_id
+                account_position_id = self.backend_record.account_position_business_non_eu_id.id
                 sale_type_id = self.backend_record.sale_order_type_business_non_eu_id.id
             property_account_receivable_id = self.backend_record.account_receivable_business_id.id
         else:

@@ -3,7 +3,7 @@
 
 {
     'name': 'Prestashop Connector Italian localization',
-    'version': '12.0.0.4.3',
+    'version': '12.0.0.5.3',
     'category': 'Connector',
     'depends': [
         'connector_prestashop',
@@ -11,6 +11,7 @@
         'sale_order_type',          # OCA sale-workflow
     ],
     'author': 'Didotech srl',
+    'website': 'https://github.com/LibrERP/connector-prestashop',
     'license': 'AGPL-3',
 
     'data': [
