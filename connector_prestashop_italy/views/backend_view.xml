@@ -28,6 +28,16 @@
                         <field name="sale_order_type_business_non_eu_id" />
                     </group>
                 </group>
+                 <group colspan="4">
+                    <group string="Transprt Document Types">
+                        <field name="ddt_type_private_id" />
+                        <field name="ddt_type_business_id" />
+                        <field name="ddt_type_private_eu_id" />
+                        <field name="ddt_type_business_eu_id" />
+                        <field name="ddt_type_private_non_eu_id" />
+                        <field name="ddt_type_business_non_eu_id" />
+                    </group>
+                </group>
                 <group colspan="4">
                     <group string="Account receivable for Customer">
                         <field name="account_receivable_private_id" />

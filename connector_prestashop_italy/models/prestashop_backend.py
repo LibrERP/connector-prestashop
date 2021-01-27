@@ -47,6 +47,19 @@ class PrestashopBackend(models.Model):
     sale_order_type_business_non_eu_id = fields.Many2one(
         comodel_name="sale.order.type", string="Business not EU")
 
+    ddt_type_private_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Private")
+    ddt_type_business_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Business")
+    ddt_type_private_eu_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Private EU")
+    ddt_type_business_eu_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Business EU")
+    ddt_type_private_non_eu_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Private not EU")
+    ddt_type_business_non_eu_id = fields.Many2one(
+        comodel_name="stock.ddt.type", string="Business not EU")
+
     partner_e_invoice_detail_level = fields.Selection([
         ('0', 'Minimum'),
         ('1', 'Tax Rate'),

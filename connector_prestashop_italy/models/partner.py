@@ -73,17 +73,21 @@ class ItalyPartnerImportMapper(PartnerImportMapper):
         sale_type_id = self.backend_record.sale_order_type_private_id.id
         account_position_id = self.backend_record.account_position_private_id.id
         preferred_pick_location_id = self.backend_record.stock_location_id.id
+        ddt_type_id = self.backend_record.ddt_type_private_id.id
 
         if vat:
             if vat[0].upper() == self.env.user.company_id.partner_id.country_id.code.upper():
                 account_position_id = self.backend_record.account_position_business_id.id
                 sale_type_id = self.backend_record.sale_order_type_business_id.id
+                ddt_type_id = self.backend_record.ddt_type_business_id.id
             elif vat[0].upper() in EUROPEAN_UNION:
                 account_position_id = self.backend_record.account_position_business_eu_id.id
                 sale_type_id = self.backend_record.sale_order_type_business_eu_id.id
+                ddt_type_id = self.backend_record.ddt_type_business_eu_id.id
             else:
                 account_position_id = self.backend_record.account_position_business_non_eu_id.id
                 sale_type_id = self.backend_record.sale_order_type_business_non_eu_id.id
+                ddt_type_id = self.backend_record.ddt_type_business_non_eu_id.id
             property_account_receivable_id = self.backend_record.account_receivable_business_id.id
         else:
             property_account_receivable_id = self.backend_record.account_receivable_private_id.id
@@ -93,9 +97,11 @@ class ItalyPartnerImportMapper(PartnerImportMapper):
                 elif (country.code.upper() in EUROPEAN_UNION):
                     sale_type_id = self.backend_record.sale_order_type_private_eu_id.id
                     account_position_id = self.backend_record.account_position_private_eu_id.id
+                    ddt_type_id = self.backend_record.ddt_type_private_eu_id.id
                 elif (country.code.upper() not in EUROPEAN_UNION):
                     sale_type_id = self.backend_record.sale_order_type_private_non_eu_id.id
                     account_position_id = self.backend_record.account_position_private_non_eu_id.id
+                    ddt_type_id = self.backend_record.ddt_type_private_non_eu_id.id
 
         if country and country.code.upper() == self.env.user.company_id.partner_id.country_id.code.upper() or not country:
             property_account_payable_id = self.backend_record.account_payable_national_id.id
@@ -103,6 +109,7 @@ class ItalyPartnerImportMapper(PartnerImportMapper):
             property_account_payable_id = self.backend_record.account_payable_foreign_id.id
 
         return {
+            'ddt_type_id': ddt_type_id,
             'property_account_position_id': account_position_id,
             'property_account_receivable_id': property_account_receivable_id,
             'property_account_payable_id': property_account_payable_id,
