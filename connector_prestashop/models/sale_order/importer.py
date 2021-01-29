@@ -401,14 +401,19 @@ class SaleOrderImporter(Component):
             message=msg,
         )
 
-    def _has_deleted_records(self):
+    def _has_deleted_records(self, added=False):
         binder = self.binder_for('prestashop.res.partner')
         binding = binder.to_internal(self.prestashop_record['id_customer'])
 
         if binding:
             return False
-        else:
+        elif added:
             return True
+        else:
+            with self.backend_record.work_on('prestashop.res.partner') as work:
+                importer = work.component(usage='record.importer')
+                importer.run(prestashop_id=self.prestashop_record['id_customer'])
+            return self._has_deleted_records(added=True)
 
     def _has_to_skip(self):
         """ Return True if the import can be skipped """
