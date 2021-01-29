@@ -8,7 +8,7 @@
 
 {
     "name": "PrestaShop-Odoo connector",
-    "version": "12.0.6.18.17",
+    "version": "12.0.6.18.18",
     "license": "AGPL-3",
     "depends": [
         "account",

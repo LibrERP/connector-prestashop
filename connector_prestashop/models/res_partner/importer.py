@@ -197,10 +197,8 @@ class AddressImporter(Component):
     _inherit = 'prestashop.importer'
     _apply_on = 'prestashop.address'
 
-    def _check_vat(self, vat):
-        vat_country, vat_number = vat[:2].lower(), vat[2:]
-        partner_model = self.env['res.partner']
-        return partner_model.simple_vat_check(vat_country, vat_number)
+    def _check_vat(self, country_code, vat):
+        return self.env['res.partner'].simple_vat_check(country_code.lower(), vat[2:])
 
     def _after_import(self, binding):
         record = self.prestashop_record
@@ -218,7 +216,7 @@ class AddressImporter(Component):
             if not regexp.match(vat_number):
                 country_code = binding.country_id.code or self.env.user.company_id.partner_id.country_id.code
                 vat_number = country_code + vat_number
-            if self._check_vat(vat_number):
+            if self._check_vat(binding.country_id.code, vat_number):
                 binding.parent_id.write({
                     'vat': vat_number,
                     'is_company': True
