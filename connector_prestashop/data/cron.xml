@@ -90,4 +90,5 @@
 <!--        <field name="args" eval="'()'"/>-->
 <!--    </record>-->
 
+    </data>
 </odoo>
