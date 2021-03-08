@@ -103,3 +103,11 @@ class PrestashopBackend(models.Model):
     @api.model
     def update_stock_qty(self, domain=None):
         self.search(domain or []).update_product_stock_qty()
+
+    @api.model
+    def update_products(self, domain=None):
+        self.search(domain or []).import_products()
+
+    @api.model
+    def update_bom_templates(self, domain=None):
+        self.env["check.mrp.bom"].refresh()
