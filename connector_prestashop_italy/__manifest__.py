@@ -3,7 +3,7 @@
 
 {
     'name': 'Prestashop Connector Italian localization',
-    'version': '12.0.0.7.0',
+    'version': '12.0.0.7.1',
     'category': 'Connector',
     'depends': [
         'connector_prestashop',
