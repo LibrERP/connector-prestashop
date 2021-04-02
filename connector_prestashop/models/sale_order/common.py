@@ -170,8 +170,6 @@ class PrestashopSaleOrderLine(models.Model):
             ('id', '=', vals['prestashop_order_id'])
         ], limit=1)
         vals['order_id'] = ps_sale_order.odoo_id.id
-        vals['name'] = ps_sale_order.name or ''
-        vals['display_name'] = ps_sale_order.display_name
         return super(PrestashopSaleOrderLine, self).create(vals)
 
 
