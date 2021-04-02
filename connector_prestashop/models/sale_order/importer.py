@@ -372,20 +372,15 @@ class SaleOrderImporter(Component):
                           else binding.total_shipping_tax_excluded)
         # when we have a carrier_id, even with a 0.0 price,
         # Odoo will add a shipping line in the SO when the picking
-        # is done, so we better add the line directly even when the
-        # price is 0.0
-        if binding.odoo_id.carrier_id:
+        # is done, so we need to delete courier_id
+        if binding.odoo_id.carrier_id and shipping_total:
             binding.odoo_id._create_delivery_line(
                 binding.odoo_id.carrier_id,
                 shipping_total
             )
-        binding.odoo_id.recompute()
-
-    # def _create(self, data):
-    #     binding = super(SaleOrderImporter, self)._create(data)
-    #     if binding.fiscal_position_id:
-    #         binding.odoo_id._compute_tax_id()
-    #     return binding
+            binding.odoo_id.recompute()
+        else:
+            binding.odoo_id.carrier_id = False
 
     def _after_import(self, binding):
         super(SaleOrderImporter, self)._after_import(binding)
