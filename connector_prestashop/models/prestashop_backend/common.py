@@ -190,7 +190,7 @@ class PrestashopBackend(models.Model):
     #     inverse_name="Backend",
     #     string="Currencies"
     # )
-
+    product_with_images = fields.Boolean(help="Import Product Images. Can be slow")
 
     @api.onchange("matching_customer")
     def change_matching_customer(self):

@@ -209,6 +209,7 @@
                                            attrs="{'invisible':[('matching_product_template', '=', False)],
                                                     'required':[('matching_product_template', '=', True)]}"/>
                                     <field name="no_varint_matching"/>
+                                    <field name="product_with_images"/>
                                 </group>
                                 <group string="Matching option for partner">
                                     <field name="matching_customer"></field>

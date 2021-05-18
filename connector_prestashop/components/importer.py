@@ -7,7 +7,7 @@ from contextlib import closing, contextmanager
 import odoo
 from odoo import _
 from odoo import registry
-import os
+# import os
 
 from odoo.addons.queue_job.exception import (
     RetryableJobError,
@@ -364,7 +364,7 @@ class BatchImporter(AbstractComponent):
     _inherit = ['base.importer', 'base.prestashop.connector']
     _usage = 'batch.importer'
 
-    page_size = 1000
+    page_size = 10
 
     def run(self, filters=None, **kwargs):
         """ Run the synchronization """
@@ -378,6 +378,7 @@ class BatchImporter(AbstractComponent):
             page_number * self.page_size, self.page_size)
         record_ids = self._run_page(filters, **kwargs)
         while len(record_ids) == self.page_size:
+            self.env.cr.commit()
             page_number += 1
             filters['limit'] = '%d,%d' % (
                 page_number * self.page_size, self.page_size)
