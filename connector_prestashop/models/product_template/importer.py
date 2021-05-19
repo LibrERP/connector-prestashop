@@ -552,7 +552,8 @@ class ProductTemplateImporter(Component):
 
     def _after_import(self, binding):
         super(ProductTemplateImporter, self)._after_import(binding)
-        self.import_images(binding)
+        if self.backend_record.product_with_images:
+            self.import_images(binding)
         self.import_combinations()
         self.attribute_line(binding)
         self.deactivate_default_product(binding)
@@ -635,7 +636,7 @@ class ProductTemplateImporter(Component):
             for combination in combinations:
                 self._import_combination(combination)
 
-            if combinations and associations['images'].get('image'):
+            if combinations and associations['images'].get('image') and self.backend_record.product_with_images:
                 self._delay_product_image_variant([first_exec] + combinations)
 
     def import_images(self, binding):

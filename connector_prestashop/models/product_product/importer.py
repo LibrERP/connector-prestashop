@@ -171,7 +171,7 @@ class ProductCombinationMapper(Component):
         template_binder = self.binder_for('prestashop.product.template')
         product_combination_binder = self.binder_for('prestashop.product.combination')
 
-        product_id = model.search([
+        product_id = model.with_context(active_test=False).search([
             (field, '=', code),
             ('company_id', '=', self.backend_record.company_id.id),
         ], limit=1)
@@ -302,14 +302,14 @@ class ProductCombinationMapper(Component):
             if self.backend_record.matching_product_ch == 'reference':
                 code = self.default_code(record)['default_code']
                 if code:
-                    product = self.env['product.product'].search(
+                    product = self.env['product.product'].with_context(active_test=False).search(
                         [('default_code', '=', code)], limit=1)
                     if product:
                         return {'odoo_id': product.id}
             if self.backend_record.matching_product_ch == 'barcode':
                 code = self.barcode(record)['barcode']
                 if code:
-                    product = self.env['product.product'].search(
+                    product = self.env['product.product'].with_context(active_test=False).search(
                         [('barcode', '=', code)], limit=1)
                     if product:
                         return {'odoo_id': product.id}
