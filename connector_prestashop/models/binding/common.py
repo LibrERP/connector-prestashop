@@ -22,7 +22,7 @@ class PrestashopBinding(models.AbstractModel):
         string='Active',
         default=True
     )
-    prestashop_id = fields.Integer('ID on PrestaShop')
+    prestashop_id = fields.Integer('ID on PrestaShop', index=True)
     no_export = fields.Boolean('No export to PrestaShop')
 
     _sql_constraints = [

@@ -30,36 +30,38 @@ class TaxGroupMapper(Component):
     @only_create
     @mapping
     def odoo_id(self, record):
-
-        tax_group = self.env['account.tax.group'].search([
+        # 'account.tax.group'
+        tax_group = self.model.odoo_id.with_context(lang='en_EN').search([
             ('name', '=', record['name'])
-        ])
+        ], order='id', limit=1)
         if tax_group:
-            already_binded = self.check_binding(record, tax_group.id)
-            if already_binded:
-                return {
-                    'name': already_binded['new_name']
-                }
-            else:
-                return {'odoo_id': tax_group.id}
+            # already_binded = self.check_binding(record, tax_group.id)
+            # if already_binded:
+            #     return {
+            #         'name': already_binded['new_name']
+            #     }
+            # else:
+            return {
+                'odoo_id': tax_group.id
+            }
 
-    def check_binding(self, record, odoo_id):
-        counter = 1
-        while odoo_id and self.model.search([
-            ('odoo_id', '=', odoo_id),
-            ('backend_id', '=', self.backend_record.id)
-        ]):
-            counter += 1
-            name = '{} {}'.format(record['name'], counter)
-            odoo = self.model.odoo_id.search([
-                ('name', '=', name)
-            ], limit=1)
-            odoo_id = odoo and odoo.id or False
-
-        if counter == 1:
-            return False
-        else:
-            return {'new_name': name}
+    # def check_binding(self, record, odoo_id):
+    #     counter = 1
+    #     while odoo_id and self.model.search([
+    #         ('odoo_id', '=', odoo_id),
+    #         ('backend_id', '=', self.backend_record.id)
+    #     ]):
+    #         counter += 1
+    #         name = '{} {}'.format(record['name'], counter)
+    #         odoo = self.model.odoo_id.with_context(lang='en_EN').search([
+    #             ('name', '=', name)
+    #         ], limit=1)
+    #         odoo_id = odoo and odoo.id or False
+    #
+    #     if counter == 1:
+    #         return False
+    #     else:
+    #         return {'new_name': name}
 
 
 class TaxGroupImporter(Component):

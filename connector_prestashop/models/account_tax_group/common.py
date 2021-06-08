@@ -39,6 +39,11 @@ class PrestashopAccountTaxGroup(models.Model):
         oldname='openerp_id',
     )
 
+    _sql_constraints = [
+        ('prestashop_erp_uniq', 'unique(backend_id, odoo_id, prestashop_id)',
+         'An ERP record with same ID already exists on PrestaShop.'),
+    ]
+
 
 class TaxGroupAdapter(Component):
     _name = 'prestashop.account.tax.group.adapter'

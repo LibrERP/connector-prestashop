@@ -347,6 +347,9 @@ class PrestashopImporter(AbstractComponent):
                 elif self.work.model_name == 'prestashop.res.country.state':
                     if not record.get('active'):
                         return
+            elif self.work.model_name == 'prestashop.account.tax.group':
+                if 'odoo_id' in record:
+                    del record['name']
 
             binding = self._create(record)
 
