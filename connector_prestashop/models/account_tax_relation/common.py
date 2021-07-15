@@ -5,11 +5,16 @@ from odoo import fields, models
 from odoo.addons.component.core import Component
 
 
-class AccountTaxGroup(models.Model):
-    _inherit = 'account.tax.group'
+class AccountTaxRelation(models.Model):
+    _name = 'account.tax.relation'
+    _description = 'Relation between Prestashop and Odoo taxes'
 
+    _order = 'sequence asc'
+
+    name = fields.Char(required=True, translate=True)
+    sequence = fields.Integer(default=10)
     prestashop_bind_ids = fields.One2many(
-        comodel_name='prestashop.account.tax.group',
+        comodel_name='prestashop.account.tax.relation',
         inverse_name='odoo_id',
         string='PrestaShop Bindings',
         readonly=True
@@ -19,21 +24,20 @@ class AccountTaxGroup(models.Model):
         index=True,
         string='Company',
     )
-    tax_ids = fields.One2many(
+    tax_id = fields.Many2one(
         comodel_name='account.tax',
-        inverse_name='tax_group_id',
-        string='Taxes',
+        string='Odoo Tax',
     )
 
 
-class PrestashopAccountTaxGroup(models.Model):
-    _name = 'prestashop.account.tax.group'
+class PrestashopAccountTaxRelation(models.Model):
+    _name = 'prestashop.account.tax.relation'
     _inherit = 'prestashop.binding.odoo'
-    _inherits = {'account.tax.group': 'odoo_id'}
+    _inherits = {'account.tax.relation': 'odoo_id'}
 
     odoo_id = fields.Many2one(
-        comodel_name='account.tax.group',
-        string='Tax Group',
+        comodel_name='account.tax.relation',
+        string='Tax Relation',
         required=True,
         ondelete='cascade',
         oldname='openerp_id',
@@ -45,10 +49,10 @@ class PrestashopAccountTaxGroup(models.Model):
     ]
 
 
-class TaxGroupAdapter(Component):
-    _name = 'prestashop.account.tax.group.adapter'
+class TaxRelationAdapter(Component):
+    _name = 'prestashop.account.tax.relation.adapter'
     _inherit = 'prestashop.adapter'
-    _apply_on = 'prestashop.account.tax.group'
+    _apply_on = 'prestashop.account.tax.relation'
 
-    _model_name = 'prestashop.account.tax.group'
+    _model_name = 'prestashop.account.tax.relation'
     _prestashop_model = 'tax_rule_groups'

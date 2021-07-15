@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- prestashoperpconnect for Odoo Copyright (C) 2012 Akretion Benoît Guillot 
+<!-- prestashoperpconnect for Odoo Copyright (C) 2012 Akretion Benoît Guillot
     <benoit.guillot@akretion.com> The licence is in the file __openerp__.py -->
 
 <odoo>
@@ -60,10 +60,10 @@
 
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem id="menu_prestashop_external_objects" name="External Objects"
-        parent="menu_prestashop_root" 
+        parent="menu_prestashop_root"
         sequence="100"/>
 
-    <!-- <menuitem id="menu_prestashop_external_uom" name="External UOM" parent="menu_prestashop_external_objects" 
+    <!-- <menuitem id="menu_prestashop_external_uom" name="External UOM" parent="menu_prestashop_external_objects"
         action="action_prestashop_uom" /> -->
 
     <menuitem id="menu_prestashop_external_languauges" name="External Languages"
@@ -79,7 +79,5 @@
         action="action_prestashop_product_templates" />
     <menuitem id="menu_prestashop_external_products" name="External Products"
         parent="menu_prestashop_external_objects" action="action_prestashop_products" />
-
-
 
 </odoo>

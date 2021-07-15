@@ -334,12 +334,12 @@ class TemplateMapper(Component):
     def _get_tax_ids(self, record):
         # if record['id_tax_rules_group'] == '0':
         #     return {}
-        binder = self.binder_for('prestashop.account.tax.group')
+        binder = self.binder_for('prestashop.account.tax.relation')
         tax_group = binder.to_internal(
             record['id_tax_rules_group'],
             unwrap=True,
         )
-        return tax_group.tax_ids
+        return tax_group.tax_id
 
     @mapping
     def taxes_id(self, record):

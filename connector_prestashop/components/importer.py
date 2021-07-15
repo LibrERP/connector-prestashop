@@ -308,7 +308,7 @@ class PrestashopImporter(AbstractComponent):
         """
 
         map_record = self._map_data()
-        if self.work.model_name == 'prestashop.account.tax.group':
+        if self.work.model_name == 'prestashop.account.tax.relation':
             if map_record.source['active'] == '1' and map_record.source['deleted'] == '0':
                 if binding:
                     record = self._update_data(map_record)
@@ -347,7 +347,7 @@ class PrestashopImporter(AbstractComponent):
                 elif self.work.model_name == 'prestashop.res.country.state':
                     if not record.get('active'):
                         return
-            elif self.work.model_name == 'prestashop.account.tax.group':
+            elif self.work.model_name == 'prestashop.account.tax.relation':
                 if 'odoo_id' in record:
                     del record['name']
 

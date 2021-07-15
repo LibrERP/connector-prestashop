@@ -4,7 +4,7 @@ from . import binding
 from . import account_invoice
 from . import account_payment_mode
 from . import account_tax
-from . import account_tax_group
+from . import account_tax_relation
 from . import res_partner
 from . import prestashop_backend
 from . import res_partner_category

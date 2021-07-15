@@ -1,52 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- © 2016 Sergio Teruel <sergio.teruel@tecnativa.com>
-     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl-3). -->
 <odoo>
 
-    <record id="account_tax_group_connector_prestashop_tree_view"
+    <record id="account_tax_relation_connector_prestashop_tree_view"
             model="ir.ui.view">
-        <field name="model">prestashop.account.tax.group</field>
+        <field name="model">prestashop.account.tax.relation</field>
         <field name="arch" type="xml">
-            <tree string="PrestaShop Account Tax Group" create="0">
+            <tree string="PrestaShop Account Tax relation" create="0">
                 <field name="backend_id" string="Backend"/>
                 <field name="prestashop_id"/>
             </tree>
         </field>
     </record>
 
-    <record id="view_tax_group_tree" model="ir.ui.view">
-        <field name="name">account.tax.group</field>
-        <field name="model">account.tax.group</field>
+    <record id="view_tax_relation_tree" model="ir.ui.view">
+        <field name="name">account.tax.relation</field>
+        <field name="model">account.tax.relation</field>
         <field name="arch" type="xml">
-            <tree string="Account Tax Group">
+            <tree string="Account Tax Relation">
                 <field name="name"/>
-                <field name="tax_ids"/>
+                <field name="tax_id"/>
             </tree>
         </field>
     </record>
 
-    <record id="prestashop_binding_tax_group_form_view"
-            model="ir.ui.view">
-        <field name="model">account.tax.group</field>
+    <record id="prestashop_binding_tax_relation_form_view" model="ir.ui.view">
+        <field name="model">account.tax.relation</field>
         <field name="arch" type="xml">
-            <form string="Account Tax Group">
+            <form string="Account Tax Relation">
                 <field name="name" colspan="4"/>
-                <field name="tax_ids" colspan="4"/>
-                <group string="PrestaShop Binding">
+                <field name="tax_id" colspan="4"/>
+                <relation string="PrestaShop Binding">
                     <field name="prestashop_bind_ids"
                            nolabel="1"/>
-                </group>
+                </relation>
             </form>
         </field>
     </record>
 
-    <record id="action_tax_group_form" model="ir.actions.act_window">
-        <field name="name">Tax Groups</field>
-        <field name="res_model">account.tax.group</field>
+    <record id="action_tax_relation_form" model="ir.actions.act_window">
+        <field name="name">Tax Relations</field>
+        <field name="res_model">account.tax.relation</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem action="action_tax_group_form" id="menu_action_tax_group_form" parent="account.account_account_menu"/>
+    <menuitem id="menu_action_tax_relation_form" name="External Tax Relations"
+              parent="menu_prestashop_external_objects" action="action_tax_relation_form"/>
 
 </odoo>

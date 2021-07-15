@@ -29,7 +29,7 @@ class PrestashopModelBinder(Component):
         'prestashop.res.country.state',
         'prestashop.res.currency',
         'prestashop.account.tax',
-        'prestashop.account.tax.group',
+        'prestashop.account.tax.relation',
         'prestashop.product.category',
         'prestashop.product.image',
         'prestashop.product.template',

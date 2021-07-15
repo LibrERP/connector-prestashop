@@ -13,7 +13,8 @@ access_prestashop_prestashop_address_full,Full access on prestashop.address,mode
 access_prestashop_prestashop_res_partner_category_user,User access on prestashop.res.partner.category,model_prestashop_res_partner_category,base.group_user,1,0,0,0
 access_prestashop_prestashop_res_partner_category_full,Full access on prestashop.res.partner.category,model_prestashop_res_partner_category,connector.group_connector_manager,1,1,1,1
 access_prestashop_account_tax_full,Full access on prestashop.account.tax,model_prestashop_account_tax,connector.group_connector_manager,1,1,1,1
-access_prestashop_account_tax_group_full,Full access on prestashop.account.tax.group,model_prestashop_account_tax_group,connector.group_connector_manager,1,1,1,1
+access_prestashop_account_tax_relation_full,Full access on prestashop.account.tax.relation,model_prestashop_account_tax_relation,connector.group_connector_manager,1,1,1,1
+access_account_tax_relation_full,Full access on account.tax.relation,model_account_tax_relation,connector.group_connector_manager,1,1,1,1
 access_mail_message,Full access on prestashop.mail.message,model_prestashop_mail_message,connector.group_connector_manager,1,1,1,1
 access_sale_order_state_full,Full access on sale.order.state,model_sale_order_state,connector.group_connector_manager,1,1,1,1
 access_prestashop_sale_order_state_full,Full access on prestashop.sale.order.state,model_prestashop_sale_order_state,connector.group_connector_manager,1,1,1,1

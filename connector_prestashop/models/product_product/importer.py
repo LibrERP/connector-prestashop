@@ -252,11 +252,11 @@ class ProductCombinationMapper(Component):
     def _get_tax_ids(self, record):
         product_tmpl_adapter = self.component(
             usage='backend.adapter', model_name='prestashop.product.template')
-        tax_group = product_tmpl_adapter.read(record['id_product'])
+        product = product_tmpl_adapter.read(record['id_product'])
         tax_group = self.binder_for(
-            'prestashop.account.tax.group').to_internal(
-                tax_group['id_tax_rules_group'], unwrap=True)
-        return tax_group.tax_ids
+            'prestashop.account.tax.relation').to_internal(
+                product['id_tax_rules_group'], unwrap=True)
+        return tax_group.tax_id
 
     def _apply_taxes(self, tax, price):
         if self.backend_record.taxes_included == tax.price_include:

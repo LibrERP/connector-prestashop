@@ -8,12 +8,12 @@ from odoo.addons.connector.components.mapper import (
 from odoo.addons.component.core import Component
 
 
-class TaxGroupMapper(Component):
-    _name = 'prestashop.account.tax.group.import.mapper'
+class TaxRelationMapper(Component):
+    _name = 'prestashop.account.tax.relation.import.mapper'
     _inherit = 'prestashop.import.mapper'
-    _apply_on = 'prestashop.account.tax.group'
+    _apply_on = 'prestashop.account.tax.relation'
 
-    _model_name = 'prestashop.account.tax.group'
+    _model_name = 'prestashop.account.tax.relation'
 
     direct = [
         ('name', 'name'),
@@ -30,19 +30,19 @@ class TaxGroupMapper(Component):
     @only_create
     @mapping
     def odoo_id(self, record):
-        # 'account.tax.group'
-        tax_group = self.model.odoo_id.with_context(lang='en_EN').search([
+        # 'account.tax.relation'
+        tax_relation = self.model.odoo_id.with_context(lang='en_EN').search([
             ('name', '=', record['name'])
         ], order='id', limit=1)
-        if tax_group:
-            # already_binded = self.check_binding(record, tax_group.id)
+        if tax_relation:
+            # already_binded = self.check_binding(record, tax_relation.id)
             # if already_binded:
             #     return {
             #         'name': already_binded['new_name']
             #     }
             # else:
             return {
-                'odoo_id': tax_group.id
+                'odoo_id': tax_relation.id
             }
 
     # def check_binding(self, record, odoo_id):
@@ -64,17 +64,17 @@ class TaxGroupMapper(Component):
     #         return {'new_name': name}
 
 
-class TaxGroupImporter(Component):
-    _name = 'prestashop.account.tax.group.importer'
+class TaxRelationImporter(Component):
+    _name = 'prestashop.account.tax.relation.importer'
     _inherit = 'prestashop.importer'
-    _apply_on = 'prestashop.account.tax.group'
+    _apply_on = 'prestashop.account.tax.relation'
 
-#     _model_name = 'prestashop.account.tax.group'
+#     _model_name = 'prestashop.account.tax.relation'
 
 
-class TaxGroupBatchImporter(Component):
-    _name = 'prestashop.account.tax.group.direct.batch.importer'
+class TaxRelationBatchImporter(Component):
+    _name = 'prestashop.account.tax.relation.direct.batch.importer'
     _inherit = 'prestashop.direct.batch.importer'
-    _apply_on = 'prestashop.account.tax.group'
+    _apply_on = 'prestashop.account.tax.relation'
 
-#     _model_name = 'prestashop.account.tax.group'
+#     _model_name = 'prestashop.account.tax.relation'
