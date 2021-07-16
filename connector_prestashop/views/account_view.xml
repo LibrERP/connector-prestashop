@@ -27,12 +27,19 @@
         <field name="model">account.tax.relation</field>
         <field name="arch" type="xml">
             <form string="Account Tax Relation">
-                <field name="name" colspan="4"/>
-                <field name="tax_id" colspan="4"/>
-                <relation string="PrestaShop Binding">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div>
+                        <label for="tax_id" />
+                        <field name="tax_id" colspan="4"/>
+                    </div>
+                    <relation string="PrestaShop Binding">
                     <field name="prestashop_bind_ids"
                            nolabel="1"/>
                 </relation>
+                </sheet>
             </form>
         </field>
     </record>
